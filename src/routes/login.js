@@ -68,7 +68,7 @@ router
                 }
                 res.setHeader(
                   'set-Cookie',
-                  cookie.serialize('DGALA-TOKEN', 'Bearer ' + token, {
+                  cookie.serialize('DGALA-TOKEN', token, {
                     httpOnly: true,
                     secure: true,
                     maxAge: remember_me ? (7 * 86400) : (86400),
@@ -78,7 +78,7 @@ router
                 );
                 console.log('token :>> ', token);
                 res.status(200).json({
-                  token: 'Bearer ' + token,
+                  success: true,
                 });
               }
             );
