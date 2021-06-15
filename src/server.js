@@ -37,6 +37,8 @@ const speedLimiter = new slowDown({
 var whitelist = [
   'http://127.0.0.1',
   'http://127.0.0.1:3000',
+  'http://192.168.1.108',
+  'http://192.168.1.108:3000',
   'https://admin.dropgala.com/',
   'http://dropgala.ddns.net/'
 ];

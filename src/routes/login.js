@@ -35,6 +35,8 @@ router
 
       const results = rows[0];
 
+      console.log(`results`, results)
+
       if (results && results.is_active) {
         /* Define variables */
         const { account_uid, first_name, last_name, email, password_hash, privileges } = results
@@ -64,6 +66,7 @@ router
                 if (err) {
                   res.status(400).json({
                     message: 'There was a problem with your Token.',
+                    success: false
                   });
                 }
                 res.setHeader(
@@ -76,7 +79,6 @@ router
                     path: '/',
                   })
                 );
-                console.log('token :>> ', token);
                 res.status(200).json({
                   success: true,
                 });
@@ -85,23 +87,25 @@ router
           } else {
             res
               .status(403)
-              .json({ message: 'Password incorrect' });
+              .json({ message: 'Password incorrect',success: false });
           }
         });
       } else if (!results) {
         res.status(400).json({
           message: 'User not found.',
+          success: false
         });
       } else if (!results.is_active) {
         res.status(400).json({
           message: 'User is not active.',
+          success: false
         });
       }
     } catch (error) {
       console.log('error :>> ', error);
       res.status(500).json({
-        success: false,
         message: 'Oops! something went wrong.',
+        success: false
       });
     }
   });
