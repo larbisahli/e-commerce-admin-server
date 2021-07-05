@@ -10,10 +10,9 @@ import {
   GraphQLBoolean,
 } from 'graphql';
 import {
-  Account,
-  AccountProfiles
+  ProductObjectType,
+  CategoriesObjectType,
 } from './queries';
-import jwt from 'jsonwebtoken';
 
 const ENV = process.env;
 const PROD_NODE_ENV = ENV.NODE_ENV === 'production';
@@ -21,32 +20,65 @@ const PROD_NODE_ENV = ENV.NODE_ENV === 'production';
 const RootQuery = new GraphQLObjectType({
   name: 'RootQueryType',
   fields: {
-    UserAccount: {
-      type: Account,
+    Category: {
+      type: CategoriesObjectType,
       args: {
+        category_uid: { type: GraphQLID },
+      },
+      async resolve(parent, { category_uid }) {
+        const { rows } = await query(QueryString.Category(), [category_uid]);
+        return rows[0];
+      },
+    },
+    Categories: {
+      type: new GraphQLList(CategoriesObjectType),
+      args: {},
+      async resolve() {
+        // **** Use pagination when it grows ****
+        const { rows } = await query(QueryString.Categories());
+        return rows;
+      },
+    },
+    Product: {
+      type: ProductObjectType,
+      args: {
+        product_uid: { type: GraphQLID },
+      },
+      async resolve(
+        parent,
+        { product_uid }
+      ) {
+
+        const { rows } = await query(QueryString.Product(), [
+          product_uid,
+        ]);
+
+        return rows[0];
+      },
+    },
+    Products: {
+      type: ProductObjectType,
+      args: {
+        account_uid: { type: GraphQLID },
+        category_uid: { type: GraphQLID },
         page: { type: GraphQLInt },
         limit: { type: GraphQLInt },
       },
-      async resolve(parent, { page, limit }) {
-        if (page === 0) {
-          // Select quizzes with most recent timestamp and sort them based on is_new property.
-          const { rows } = await query(QueryString.LatestQuizzes(), [limit]);
-          rows.sort(function (x, y) {
-            return ~x.is_new - ~y.is_new;
-          });
-          return rows;
-        } else if (page > 0) {
-          // Pagination
-          const offset = (page - 1) * limit;
-          const { rows } = await query(QueryString.PaginateQuizzes(), [
-            offset,
-            limit,
-          ]);
-          rows.sort(function (x, y) {
-            return ~x.is_new - ~y.is_new;
-          });
-          return rows;
-        }
+      async resolve(
+        parent,
+        { account_uid, category_uid, page, limit }
+      ) {
+
+        const offset = (page - 1) * limit;
+
+        const { rows } = await query(QueryString.Products(), [
+          category_uid,
+          account_uid,
+          limit,
+          offset
+        ]);
+
+        return rows;
       },
     }
   },
@@ -55,36 +87,128 @@ const RootQuery = new GraphQLObjectType({
 const Mutation = new GraphQLObjectType({
   name: 'Mutation',
   fields: {
-    UpdateUserAccount: {
-      type: Account,
+    CreateCategory: {
+      type: CategoriesObjectType,
       args: {
-        email: { type: GraphQLString },
-        password: { type: GraphQLString },
+        category_name: { type: GraphQLString },
+        category_description: { type: GraphQLString },
+        is_active: { type: GraphQLBoolean },
       },
       async resolve(
         parent,
-        { quiz_uid, title, category, quiz_description, is_active },
-        { redis }
+        { category_name, category_description, is_active }
       ) {
-        if (quiz_uid) {
-          const { rows } = await query(QueryString.UpdateQuizAdmin(), [
-            title,
-            category,
-            quiz_description,
-            is_active,
-            quiz_uid,
-          ]);
-          const Quiz = await query(QueryString.Quiz(), [quiz_uid]);
-          await redis.setAsync(
-            quiz_uid,
-            JSON.stringify({
-              ...Quiz.rows[0],
-            })
-          );
-          return rows[0];
-        } else {
-          throw new Error('Quiz id is not provided.');
-        }
+        const { rows } = await query(QueryString.CreateCategory(), [
+          category_name,
+          category_description,
+          is_active,
+        ]);
+        return rows[0];
+      },
+    },
+    UpdateCategory: {
+      type: CategoriesObjectType,
+      args: {
+        category_uid: { type: GraphQLID },
+        category_name: { type: GraphQLString },
+        category_description: { type: GraphQLString },
+        is_active: { type: GraphQLBoolean },
+      },
+      async resolve(
+        parent,
+        { category_uid, category_name, category_description, is_active }
+      ) {
+        const { rows } = await query(QueryString.UpdateCategory(), [
+          category_uid,
+          category_name,
+          category_description,
+          is_active,
+        ]);
+        return rows[0];
+      },
+    },
+    CreateProduct: {
+      type: ProductObjectType,
+      args: {
+        category_uid: { type: GraphQLID },
+        account_uid: { type: GraphQLID },
+        title: { type: GraphQLString },
+        price: { type: GraphQLInt },
+        discount: { type: GraphQLInt },
+        shipping_price: { type: GraphQLInt },
+        warehouse_location: { type: GraphQLString },
+        product_description: { type: GraphQLString },
+        short_description: { type: GraphQLString },
+        quantity: { type: GraphQLInt },
+        product_weight: { type: GraphQLInt },
+        available_sizes: { type: GraphQLString },
+        available_colors: { type: GraphQLString },
+        size: { type: GraphQLString },
+        color: { type: GraphQLString },
+        is_new: { type: GraphQLBoolean },
+      },
+      async resolve(
+        parent,
+        { category_uid, account_uid, title, price, discount,
+          shipping_price, warehouse_location, product_description,
+          short_description, quantity, product_weight, available_sizes,
+          available_colors, size, color, is_new }
+      ) {
+
+        console.log(`===>`, {
+          category_uid, account_uid, title, price, discount,
+          shipping_price, warehouse_location, product_description,
+          short_description, quantity, product_weight, available_sizes,
+          available_colors, size, color, is_new
+        })
+
+        const { rows } = await query(QueryString.CreateProduct(), [
+          category_uid, account_uid, title, price, discount,
+          shipping_price, warehouse_location, product_description,
+          short_description, quantity, product_weight, available_sizes,
+          available_colors, size, color, is_new
+        ]);
+
+        console.log(`rows`, { rows })
+
+        return rows[0];
+      },
+    },
+    UpdateProduct: {
+      type: ProductObjectType,
+      args: {
+        product_uid: { type: GraphQLID },
+        title: { type: GraphQLString },
+        price: { type: GraphQLInt },
+        discount: { type: GraphQLInt },
+        shipping_price: { type: GraphQLInt },
+        warehouse_location: { type: GraphQLString },
+        product_description: { type: GraphQLString },
+        short_description: { type: GraphQLString },
+        quantity: { type: GraphQLInt },
+        product_weight: { type: GraphQLInt },
+        available_sizes: { type: GraphQLString },
+        available_colors: { type: GraphQLString },
+        size: { type: GraphQLString },
+        color: { type: GraphQLString },
+        is_new: { type: GraphQLBoolean },
+      },
+      async resolve(
+        parent,
+        { product_uid, title, price, discount,
+          shipping_price, warehouse_location, product_description,
+          short_description, quantity, product_weight, available_sizes,
+          available_colors, size, color, is_new }
+      ) {
+
+        const { rows } = await query(QueryString.UpdateProduct(), [
+          product_uid, title, price, discount,
+          shipping_price, warehouse_location, product_description,
+          short_description, quantity, product_weight, available_sizes,
+          available_colors, size, color, is_new
+        ]);
+
+        return rows[0];
       },
     }
   },

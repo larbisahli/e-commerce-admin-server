@@ -21,7 +21,7 @@ const pool = new Pool({
   user: ENV.DB_USER_DEV,
   password: ENV.DB_PASSWORD_DEV,
   database: ENV.DB_NAME_DEV,
-  max: 20
+  max: 20,
 });
 
 // pool.on('connect', (client) => {
