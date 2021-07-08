@@ -38,10 +38,9 @@ const Product = () => {
 const CreateProduct = () => {
     return `
     INSERT INTO products(
-        category_uid, account_uid, title, price, discount, shipping_price,
-        warehouse_location, product_description, short_description, quantity,
-        product_weight, available_sizes, available_colors, size, color,
-        is_new) 
+        category_uid, account_uid, title, price, discount, warehouse_location, 
+        product_description, short_description, inventory, product_weight, 
+        available_sizes, available_colors, size, color, is_new) 
     VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 
         string_to_array(($12)::TEXT, ',')::TEXT[], string_to_array(($13)::TEXT, ',')::TEXT[], 
         $14, $15, $16) RETURNING product_uid
@@ -51,8 +50,8 @@ const CreateProduct = () => {
 const UpdateProduct = () => {
     return `
        UPDATE products SET category_uid = $2, title = $3, price = $4, discount = $5,
-       shipping_price = $6, warehouse_location = $7, product_description = $8,
-       short_description = $9, quantity = $10, product_weight = $11, available_sizes = $12,
+       warehouse_location = $7, product_description = $8, short_description = $9,
+       inventory = $10, product_weight = $11, available_sizes = $12,
        available_colors = $13, size = $14, color = $15, is_new = $16, updated_at = $17
        WHERE product_uid = $1 RETURNING product_uid
     `

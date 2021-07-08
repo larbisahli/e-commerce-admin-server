@@ -94,6 +94,11 @@ app.use(
   async (req, res, next) => {
     // Token Validation
     try {
+
+      if (!req.headers.authorization) {
+        return res.status(403).send({ message: "Unknown Error" })
+      }
+
       let results = null
       const bearerHeader = req.headers.authorization
 

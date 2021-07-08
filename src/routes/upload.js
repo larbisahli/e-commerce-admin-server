@@ -1,129 +1,97 @@
 import { Router } from 'express';
-import AWS from 'aws-sdk';
-import multer from 'multer';
-import multerS3 from 'multer-s3';
-import UploadImageByUrl from '../lib/UploadByUrl'
+import UploadImageByUrl from '../lib/upload'
+import jwt from 'jsonwebtoken';
+import fs from 'fs';
+import { query } from './db';
 
 const router = Router();
 
-// Set S3 endpoint to DigitalOcean Spaces
-const spacesEndpoint = new AWS.Endpoint(process.env.SPACES_BUCKET_ENDPOINT);
-
-const s3 = new AWS.S3({
-  endpoint: spacesEndpoint,
-  accessKeyId: process.env.SPACES_ACCESS_KEY_ID,
-  secretAccessKey: process.env.SPACES_ACCESS_SECRET_KEY,
-});
-
-const newDate = new Date();
-const StringDate =
-  parseInt(newDate.getMonth() + 1) +
-  '_' +
-  newDate.getDate() +
-  '_' +
-  newDate.getFullYear();
-
-const uploadThumbnail = multer({
-  storage: multerS3({
-    s3: s3,
-    bucket: process.env.SPACES_BUCKET_NAME,
-    acl: 'public-read',
-    key: function (request, file, cb) {
-      const { originalname } = file;
-      let fileName = originalname;
-      cb(null, fileName);
-    },
-  }),
-}).single('file');
-
-const uploadGallery = multer({
-  storage: multerS3({
-    s3: s3,
-    bucket: process.env.SPACES_BUCKET_NAME,
-    acl: 'public-read',
-    key: function (request, file, cb) {
-      const { originalname } = file;
-      let fileName = originalname;
-      cb(null, fileName);
-    },
-  }),
-}).array('file');
-
-const uploadBackups = multer({
-  storage: multerS3({
-    s3: s3,
-    bucket: process.env.SPACES_BUCKET_NAME,
-    acl: 'public-read',
-    key: function (request, file, cb) {
-      const { originalname } = file;
-      let fileName = originalname;
-      if (originalname.includes('postgresql_backup')) {
-        fileName = originalname.replace(
-          'postgresql_backup',
-          `postgresql_backup_${StringDate}`
-        );
-      }
-      cb(null, fileName);
-    },
-  }),
-}).array('file');
+const PublicKEY = fs.readFileSync('../config/jwtRS256.key.pub', 'utf8');
 
 
-// let upload = multer({
-//   storage: multer.diskStorage({
-//     destination: function (req, file, cb) {
-//       console.log(`======>`, { file })
-//       cb(null, './src/temp')
-//     },
-//     filename: function (req, file, cb) {
-//       cb(null, Date.now() + '-' + file.originalname)
-//     }
-//   })
-// }).single('file')
+async function Authorization(req, res, next) {
 
-// var storage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     if (!fs.existsSync('tmp')) fs.mkdirSync('tmp');
-//     cb(null, 'tmp')
-//   },
-//   filename: function (req, file, cb) {
-//     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-//     cb(null, file.fieldname + '-' + uniqueSuffix)
-//   }
-// })
+  // Token Validation
+  // try {
+  //   let results = null
+  //   const bearerHeader = req.headers.authorization
 
+  //   const IpAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress
 
-// var upload = multer({ dest: 'tmp/' })
+  //   if (!bearerHeader) {
+  //     // Show IP address
+  //     // throw new Error('No credentials sent!')
+  //     console.log(`Error: No credentials sent!, ip:${IpAddress}`)
+  //     return res.status(403).send({ error: { message: 'Unauthorized access' } })
+  //   }
 
-var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'temp/')
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    cb(null, file.fieldname + '-' + uniqueSuffix)
-  }
-})
+  //   const bearer = bearerHeader.split(' ');
+  //   const bearerToken = bearer[1];
+  //   const jwtUserToken = bearerToken;
 
-var upload = multer({ storage: storage }).single('thumbnail')
+  //   const UserInfo = jwt.verify(jwtUserToken, PublicKEY, {
+  //     algorithm: ['RS256']
+  //   });
+
+  //   const account_uid = UserInfo?.account_uid
+
+  //   if (account_uid) {
+  //     const { rows } = await query('SELECT * FROM accounts WHERE account_uid = $1', [
+  //       account_uid,
+  //     ]);
+  //     results = rows[0];
+  //   } else {
+  //     // throw new Error("Error: account_uid is undefined")
+  //     console.log(`Error: account_uid:${account_uid}, ip:${IpAddress}`)
+  //     return res.status(403).send({ error: { message: 'Unknown Error' } })
+  //   }
+
+  //   if (results && results?.is_active) {
+  //     req.userId = results.account_uid
+  //     req.privileges = results.privileges
+  //   } else if (!results) {
+  //     // throw new Error("Error: User not found")
+  //     console.log(`Error: User ${account_uid} not found. ip:${IpAddress}`)
+  //     return res.status(403).send({ error: { message: 'Unknown Error' } })
+  //   } else {
+  //     // throw new Error(`User ${account_uid} Not Active.`)
+  //     return res.status(403).send({ error: { message: 'Error: Account is not active.' } })
+  //   }
+
+  // } catch (err) {
+  //   console.log('err :>> ', err);
+  //   return next(err)
+  // }
+  return next();
+}
 
 // upload/images
-router.route('/').post(async (req, res) => {
-  console.log(`<request> ==>`, req.files);
-  console.log(`<request> ==>`, req.body.image.length);
+router.route('/')
+  .all(Authorization)
+  .post(async (req, res) => {
+    console.log(`<request> ==>`, req.body.image.length);
 
+    const { image: url, title, product_uid } = req.body
 
-  const { image, placeholder, error } = await UploadImageByUrl(
-    req.body.image,
-    req.body.title
-  );
+    const { image, placeholder, error } = await UploadImageByUrl(
+      url,
+      title
+    );
 
-  console.log(`<> ==>`, { image, placeholder, error });
+    console.log(`<> ==>`, { image, placeholder, error });
 
-  res.status(200).json({
-    success: true,
+    res.status(200).json({
+      success: true,
+      image,
+      placeholder,
+      error
+    });
+
+    // res.status(400).json({
+    //   success: false,
+    //   error: {}
+    // });
+
   });
-
-});
 
 module.exports = router;

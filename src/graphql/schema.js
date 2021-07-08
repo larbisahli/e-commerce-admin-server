@@ -14,8 +14,8 @@ import {
   CategoriesObjectType,
 } from './queries';
 
-const ENV = process.env;
-const PROD_NODE_ENV = ENV.NODE_ENV === 'production';
+// const ENV = process.env;
+// const PROD_NODE_ENV = ENV.NODE_ENV === 'production';
 
 const RootQuery = new GraphQLObjectType({
   name: 'RootQueryType',
@@ -135,11 +135,10 @@ const Mutation = new GraphQLObjectType({
         title: { type: GraphQLString },
         price: { type: GraphQLInt },
         discount: { type: GraphQLInt },
-        shipping_price: { type: GraphQLInt },
         warehouse_location: { type: GraphQLString },
         product_description: { type: GraphQLString },
         short_description: { type: GraphQLString },
-        quantity: { type: GraphQLInt },
+        inventory: { type: GraphQLInt },
         product_weight: { type: GraphQLInt },
         available_sizes: { type: GraphQLString },
         available_colors: { type: GraphQLString },
@@ -150,22 +149,22 @@ const Mutation = new GraphQLObjectType({
       async resolve(
         parent,
         { category_uid, account_uid, title, price, discount,
-          shipping_price, warehouse_location, product_description,
-          short_description, quantity, product_weight, available_sizes,
+          warehouse_location, product_description,
+          short_description, inventory, product_weight, available_sizes,
           available_colors, size, color, is_new }
       ) {
 
         console.log(`===>`, {
           category_uid, account_uid, title, price, discount,
-          shipping_price, warehouse_location, product_description,
-          short_description, quantity, product_weight, available_sizes,
+          warehouse_location, product_description,
+          short_description, inventory, product_weight, available_sizes,
           available_colors, size, color, is_new
         })
 
         const { rows } = await query(QueryString.CreateProduct(), [
           category_uid, account_uid, title, price, discount,
-          shipping_price, warehouse_location, product_description,
-          short_description, quantity, product_weight, available_sizes,
+          warehouse_location, product_description,
+          short_description, inventory, product_weight, available_sizes,
           available_colors, size, color, is_new
         ]);
 
@@ -181,11 +180,10 @@ const Mutation = new GraphQLObjectType({
         title: { type: GraphQLString },
         price: { type: GraphQLInt },
         discount: { type: GraphQLInt },
-        shipping_price: { type: GraphQLInt },
         warehouse_location: { type: GraphQLString },
         product_description: { type: GraphQLString },
         short_description: { type: GraphQLString },
-        quantity: { type: GraphQLInt },
+        inventory: { type: GraphQLInt },
         product_weight: { type: GraphQLInt },
         available_sizes: { type: GraphQLString },
         available_colors: { type: GraphQLString },
@@ -196,16 +194,16 @@ const Mutation = new GraphQLObjectType({
       async resolve(
         parent,
         { product_uid, title, price, discount,
-          shipping_price, warehouse_location, product_description,
-          short_description, quantity, product_weight, available_sizes,
-          available_colors, size, color, is_new }
+          warehouse_location, product_description,
+          short_description, inventory, product_weight,
+          available_sizes, available_colors, size, color, is_new }
       ) {
 
         const { rows } = await query(QueryString.UpdateProduct(), [
-          product_uid, title, price, discount,
-          shipping_price, warehouse_location, product_description,
-          short_description, quantity, product_weight, available_sizes,
-          available_colors, size, color, is_new
+          product_uid, title, price, discount, warehouse_location,
+          product_description, short_description, inventory,
+          product_weight, available_sizes, available_colors,
+          size, color, is_new
         ]);
 
         return rows[0];

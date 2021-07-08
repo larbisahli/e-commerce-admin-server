@@ -47,18 +47,6 @@ export const CategoriesObjectType = new GraphQLObjectType({
   }),
 });
 
-export const SubCategoriesObjectType = new GraphQLObjectType({
-  name: 'sub_categories',
-  fields: () => ({
-    sub_category_uid: { type: GraphQLID },
-    category_uid: { type: GraphQLID },
-    sub_category_name: { type: GraphQLString },
-    sub_category_description: { type: GraphQLString },
-    is_active: { type: GraphQLBoolean },
-    display_order: { type: GraphQLInt },
-  }),
-});
-
 export const ProductObjectType = new GraphQLObjectType({
   name: 'product',
   fields: () => ({
@@ -68,16 +56,17 @@ export const ProductObjectType = new GraphQLObjectType({
     title: { type: GraphQLString },
     price: { type: GraphQLInt },
     discount: { type: GraphQLInt },
-    shipping_price: { type: GraphQLInt },
     warehouse_location: { type: GraphQLString },
     product_description: { type: GraphQLString },
     short_description: { type: GraphQLString },
-    quantity: { type: GraphQLInt },
+    inventory: { type: GraphQLInt },
     product_weight: { type: GraphQLInt },
     available_sizes: { type: GraphQLString },
     available_colors: { type: GraphQLString },
     size: { type: GraphQLString },
     color: { type: GraphQLString },
     is_new: { type: GraphQLBoolean },
+    created_at: { type: GraphQLString },
+    updated_at: { type: GraphQLString },
   }),
 });
