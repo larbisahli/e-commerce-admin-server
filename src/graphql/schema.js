@@ -98,7 +98,7 @@ const Mutation = new GraphQLObjectType({
         parent,
         { category_name, category_description, is_active }
       ) {
-        const { rows } = await query(QueryString.CreateCategory(), [
+        const { rows } = await query(QueryString.InsertCategory(), [
           category_name,
           category_description,
           is_active,
@@ -140,32 +140,33 @@ const Mutation = new GraphQLObjectType({
         short_description: { type: GraphQLString },
         inventory: { type: GraphQLInt },
         product_weight: { type: GraphQLInt },
-        available_sizes: { type: GraphQLString },
-        available_colors: { type: GraphQLString },
+        available_sizes: { type: new GraphQLList(GraphQLString) },
+        available_colors: { type: new GraphQLList(GraphQLString) },
         size: { type: GraphQLString },
         color: { type: GraphQLString },
         is_new: { type: GraphQLBoolean },
+        note: { type: GraphQLString },
       },
       async resolve(
         parent,
         { category_uid, account_uid, title, price, discount,
           warehouse_location, product_description,
           short_description, inventory, product_weight, available_sizes,
-          available_colors, size, color, is_new }
+          available_colors, size, color, is_new, note }
       ) {
 
         console.log(`===>`, {
           category_uid, account_uid, title, price, discount,
           warehouse_location, product_description,
           short_description, inventory, product_weight, available_sizes,
-          available_colors, size, color, is_new
+          available_colors, size, color, is_new, note
         })
 
-        const { rows } = await query(QueryString.CreateProduct(), [
+        const { rows } = await query(QueryString.InsertProduct(), [
           category_uid, account_uid, title, price, discount,
           warehouse_location, product_description,
-          short_description, inventory, product_weight, available_sizes,
-          available_colors, size, color, is_new
+          short_description, inventory, product_weight, available_sizes?.join(','),
+          available_colors?.join(','), size, color, is_new, note
         ]);
 
         console.log(`rows`, { rows })
@@ -177,6 +178,7 @@ const Mutation = new GraphQLObjectType({
       type: ProductObjectType,
       args: {
         product_uid: { type: GraphQLID },
+        category_uid: { type: GraphQLID },
         title: { type: GraphQLString },
         price: { type: GraphQLInt },
         discount: { type: GraphQLInt },
@@ -185,25 +187,26 @@ const Mutation = new GraphQLObjectType({
         short_description: { type: GraphQLString },
         inventory: { type: GraphQLInt },
         product_weight: { type: GraphQLInt },
-        available_sizes: { type: GraphQLString },
-        available_colors: { type: GraphQLString },
+        available_sizes: { type: new GraphQLList(GraphQLString) },
+        available_colors: { type: new GraphQLList(GraphQLString) },
         size: { type: GraphQLString },
         color: { type: GraphQLString },
         is_new: { type: GraphQLBoolean },
+        note: { type: GraphQLString },
       },
       async resolve(
         parent,
-        { product_uid, title, price, discount,
+        { product_uid, category_uid, title, price, discount,
           warehouse_location, product_description,
           short_description, inventory, product_weight,
-          available_sizes, available_colors, size, color, is_new }
+          available_sizes, available_colors, size, color, is_new, note }
       ) {
 
         const { rows } = await query(QueryString.UpdateProduct(), [
-          product_uid, title, price, discount, warehouse_location,
+          product_uid, category_uid, title, price, discount, warehouse_location,
           product_description, short_description, inventory,
-          product_weight, available_sizes, available_colors,
-          size, color, is_new
+          product_weight, available_sizes?.join(','), available_colors?.join(','),
+          size, color, is_new, note
         ]);
 
         return rows[0];

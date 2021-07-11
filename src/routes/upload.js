@@ -2,11 +2,12 @@ import { Router } from 'express';
 import UploadImageByUrl from '../lib/upload'
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
-import { query } from './db';
+import { query } from '../db';
+import QueryString from '../sql/Queries';
 
 const router = Router();
 
-const PublicKEY = fs.readFileSync('../config/jwtRS256.key.pub', 'utf8');
+// const PublicKEY = fs.readFileSync('../config/jwtRS256.key.pub', 'utf8');
 
 
 async function Authorization(req, res, next) {
@@ -69,28 +70,47 @@ async function Authorization(req, res, next) {
 router.route('/')
   .all(Authorization)
   .post(async (req, res) => {
-    console.log(`<request> ==>`, req.body.image.length);
 
-    const { image: url, title, product_uid } = req.body
+    const { image: url, title, index, product_uid } = req.body
 
-    const { image, placeholder, error } = await UploadImageByUrl(
-      url,
-      title
-    );
+    const ImageIndex = Number(index)
 
-    console.log(`<> ==>`, { image, placeholder, error });
+    console.log(`<request> ==>`, { title, ImageIndex, product_uid });
 
-    res.status(200).json({
-      success: true,
-      image,
-      placeholder,
-      error
-    });
+    if (!product_uid) return res.status(403).json({ success: false, error: 'Unknown error' });
 
-    // res.status(400).json({
-    //   success: false,
-    //   error: {}
-    // });
+    try {
+
+      const { image, error } = await UploadImageByUrl(
+        url,
+        title
+      );
+
+
+      if (error) {
+        return res.status(500).json({ success: false, error });
+      }
+
+      if (!error) {
+        console.log(`error`, { error, is: ImageIndex === 0, ImageIndex })
+
+        // Get the product title
+
+        const { rows } = await query(QueryString.InsertImage(), [
+          product_uid,
+          image.path,
+          ImageIndex === 0,
+          ImageIndex
+        ]);
+
+        console.log(`rows`, rows)
+
+        return res.status(200).json({ success: true });
+      }
+    } catch (error) {
+      console.log(`upload route error ==>`, { error })
+      return res.status(500).json({ success: false, error });
+    }
 
   });
 

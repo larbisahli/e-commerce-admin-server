@@ -28,20 +28,20 @@ const DEV_NODE_ENV = ENV.NODE_ENV !== 'production';
 
 if (!fs.existsSync('./src/temp')) fs.mkdirSync('./src/temp');
 
-// const client = redis.createClient({
-//   host: DEV_NODE_ENV ? '127.0.0.1' : 'redis',
-//   port: 6379,
-//   password: process.env.REDIS_PASSWORD,
-// });
+const client = redis.createClient({
+  host: DEV_NODE_ENV ? '127.0.0.1' : 'redis',
+  port: 6379,
+  password: process.env.REDIS_PASSWORD,
+});
 
-// const speedLimiter = new slowDown({
-//   store: new RedisStore({
-//     client,
-//   }),
-//   windowMs: 5 * 1000, // 5 seconds
-//   delayAfter: 10, // allow 10 requests per 5 seconds, then...
-//   delayMs: 100, // begin adding 100ms of delay per request above 10
-// });
+const speedLimiter = new slowDown({
+  store: new RedisStore({
+    client,
+  }),
+  windowMs: 5 * 1000, // 5 seconds
+  delayAfter: 10, // allow 10 requests per 5 seconds, then...
+  delayMs: 100, // begin adding 100ms of delay per request above 10
+});
 
 var whitelist = [
   'http://127.0.0.1',
@@ -76,7 +76,7 @@ app.use(formData.parse())
 
 app.use(helmet());
 
-// app.use(speedLimiter);
+app.use(speedLimiter);
 
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Credentials', true);
