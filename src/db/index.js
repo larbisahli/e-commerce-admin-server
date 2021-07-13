@@ -29,7 +29,11 @@ const pool = new Pool({
 // });
 
 async function query(text, params) {
-  return await pool.query(text, params);
+  try {
+    return await pool.query(text, params);
+  } catch (error) {
+    console.log(`db Error :>`, { error })
+  }
 }
 
 async function getClient() {

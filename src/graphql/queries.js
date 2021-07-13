@@ -7,7 +7,7 @@ import {
   GraphQLList,
 } from 'graphql';
 
-export const AccountObjectType = new GraphQLObjectType({
+export const AccountType = new GraphQLObjectType({
   name: 'account',
   fields: () => ({
     account_uid: { type: GraphQLID },
@@ -23,7 +23,7 @@ export const AccountObjectType = new GraphQLObjectType({
   }),
 });
 
-export const AccountProfilesObjectType = new GraphQLObjectType({
+export const ProfileType = new GraphQLObjectType({
   name: 'account_profile',
   fields: () => ({
     profile_uid: { type: GraphQLID },
@@ -36,7 +36,7 @@ export const AccountProfilesObjectType = new GraphQLObjectType({
   }),
 });
 
-export const CategoriesObjectType = new GraphQLObjectType({
+export const CategoryType = new GraphQLObjectType({
   name: 'categories',
   fields: () => ({
     category_uid: { type: GraphQLID },
@@ -47,7 +47,7 @@ export const CategoriesObjectType = new GraphQLObjectType({
   }),
 });
 
-export const ProductObjectType = new GraphQLObjectType({
+export const ProductType = new GraphQLObjectType({
   name: 'product',
   fields: () => ({
     product_uid: { type: GraphQLID },
@@ -67,7 +67,17 @@ export const ProductObjectType = new GraphQLObjectType({
     color: { type: GraphQLString },
     is_new: { type: GraphQLBoolean },
     note: { type: GraphQLString },
+    thumbnail: { type: new GraphQLList(IMGType) },
+    gallery: { type: new GraphQLList(IMGType) },
     created_at: { type: GraphQLString },
     updated_at: { type: GraphQLString },
+  }),
+});
+
+const IMGType = new GraphQLObjectType({
+  name: 'IMG',
+  fields: () => ({
+    image_uid: { type: GraphQLID },
+    image: { type: GraphQLString }
   }),
 });

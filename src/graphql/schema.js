@@ -10,8 +10,8 @@ import {
   GraphQLBoolean,
 } from 'graphql';
 import {
-  ProductObjectType,
-  CategoriesObjectType,
+  ProductType,
+  CategoryType,
 } from './queries';
 
 // const ENV = process.env;
@@ -21,7 +21,7 @@ const RootQuery = new GraphQLObjectType({
   name: 'RootQueryType',
   fields: {
     Category: {
-      type: CategoriesObjectType,
+      type: CategoryType,
       args: {
         category_uid: { type: GraphQLID },
       },
@@ -31,7 +31,7 @@ const RootQuery = new GraphQLObjectType({
       },
     },
     Categories: {
-      type: new GraphQLList(CategoriesObjectType),
+      type: new GraphQLList(CategoryType),
       args: {},
       async resolve() {
         // **** Use pagination when it grows ****
@@ -40,7 +40,7 @@ const RootQuery = new GraphQLObjectType({
       },
     },
     Product: {
-      type: ProductObjectType,
+      type: ProductType,
       args: {
         product_uid: { type: GraphQLID },
       },
@@ -57,7 +57,7 @@ const RootQuery = new GraphQLObjectType({
       },
     },
     Products: {
-      type: ProductObjectType,
+      type: ProductType,
       args: {
         account_uid: { type: GraphQLID },
         category_uid: { type: GraphQLID },
@@ -88,7 +88,7 @@ const Mutation = new GraphQLObjectType({
   name: 'Mutation',
   fields: {
     CreateCategory: {
-      type: CategoriesObjectType,
+      type: CategoryType,
       args: {
         category_name: { type: GraphQLString },
         category_description: { type: GraphQLString },
@@ -107,7 +107,7 @@ const Mutation = new GraphQLObjectType({
       },
     },
     UpdateCategory: {
-      type: CategoriesObjectType,
+      type: CategoryType,
       args: {
         category_uid: { type: GraphQLID },
         category_name: { type: GraphQLString },
@@ -128,7 +128,7 @@ const Mutation = new GraphQLObjectType({
       },
     },
     CreateProduct: {
-      type: ProductObjectType,
+      type: ProductType,
       args: {
         category_uid: { type: GraphQLID },
         account_uid: { type: GraphQLID },
@@ -175,7 +175,7 @@ const Mutation = new GraphQLObjectType({
       },
     },
     UpdateProduct: {
-      type: ProductObjectType,
+      type: ProductType,
       args: {
         product_uid: { type: GraphQLID },
         category_uid: { type: GraphQLID },

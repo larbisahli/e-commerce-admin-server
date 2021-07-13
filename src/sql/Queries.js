@@ -32,8 +32,27 @@ const Products = () => {
 }
 
 const Product = () => {
-    return `SELECT * FROM products WHERE product_uid = $1`
+    return `SELECT pd.product_uid, pd.category_uid, pd.account_uid, 
+    pd.title, pd.price, pd.discount, pd.warehouse_location, 
+    pd.product_description, pd.short_description, pd.inventory, pd.product_weight, 
+    pd.available_sizes, pd.available_colors, pd.size, pd.color, pd.is_new, pd.note, 
+    ARRAY(SELECT json_build_object('image', img.image_path, 'image_uid', img.image_uid) 
+    FROM images img WHERE pd.product_uid = $1 AND thumbnail = true) AS thumbnail,
+    ARRAY(SELECT json_build_object('image', img.image_path, 'image_uid', img.image_uid) 
+    FROM images img WHERE pd.product_uid = $1 AND thumbnail = false ORDER BY img.display_order) AS gallery
+    FROM products pd WHERE product_uid = $1`
 }
+
+// const Product = () => {
+//     return `
+//     SELECT pd.product_uid, category_uid, account_uid, 
+//     title, price, discount, warehouse_location, 
+//     product_description, short_description, inventory, product_weight, 
+//     available_sizes, available_colors, size, color, is_new, note,
+//     array_remove(array_agg(CASE WHEN img.thumbnail = true THEN img.image_path ELSE NULL END), NULL) AS thumbnail,
+//     array_remove(array_agg(CASE WHEN img.thumbnail = false THEN img.image_path ELSE NULL END ORDER BY img.display_order), NULL) AS gallery 
+//     FROM products pd LEFT JOIN images img USING(product_uid) WHERE pd.product_uid = $1 GROUP BY pd.product_uid`
+// }
 
 const InsertProduct = () => {
     return `
@@ -66,6 +85,10 @@ const InsertImage = () => {
     `
 }
 
+const DeleteImage = () => {
+    return `DELETE FROM images WHERE image_uid = $1 RETURNING image_uid`;
+};
+
 module.exports = {
     Categories,
     Category,
@@ -75,5 +98,6 @@ module.exports = {
     Product,
     UpdateProduct,
     InsertProduct,
-    InsertImage
+    InsertImage,
+    DeleteImage
 };

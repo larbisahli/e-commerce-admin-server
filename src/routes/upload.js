@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import { query } from '../db';
 import QueryString from '../sql/Queries';
+import { deleteObject } from '../lib/S3'
 
 const router = Router();
 
@@ -75,8 +76,6 @@ router.route('/')
 
     const ImageIndex = Number(index)
 
-    console.log(`<request> ==>`, { title, ImageIndex, product_uid });
-
     if (!product_uid) return res.status(403).json({ success: false, error: 'Unknown error' });
 
     try {
@@ -112,6 +111,30 @@ router.route('/')
       return res.status(500).json({ success: false, error });
     }
 
-  });
+  }).delete(async (req, res) => {
+
+    const { image_uid } = req.body
+
+    if (!image_uid) return res.status(403).json({ success: false, error: 'Unknown error' });
+
+    try {
+
+      deleteObject(image_uid, async (error) => {
+
+        if (error) {
+          return res.status(500).json({ success: false, error });
+        }
+
+        await query(QueryString.DeleteImage(), [image_uid]);
+
+        return res.status(200).json({ success: true });
+      })
+
+    } catch (error) {
+      console.log(`Delete image route error ==>`, { error })
+      return res.status(500).json({ success: false, error });
+    }
+
+  })
 
 module.exports = router;
