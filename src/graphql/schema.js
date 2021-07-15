@@ -142,8 +142,6 @@ const Mutation = new GraphQLObjectType({
         product_weight: { type: GraphQLInt },
         available_sizes: { type: new GraphQLList(GraphQLString) },
         available_colors: { type: new GraphQLList(GraphQLString) },
-        size: { type: GraphQLString },
-        color: { type: GraphQLString },
         is_new: { type: GraphQLBoolean },
         note: { type: GraphQLString },
       },
@@ -152,24 +150,15 @@ const Mutation = new GraphQLObjectType({
         { category_uid, account_uid, title, price, discount,
           warehouse_location, product_description,
           short_description, inventory, product_weight, available_sizes,
-          available_colors, size, color, is_new, note }
+          available_colors, is_new, note }
       ) {
-
-        console.log(`===>`, {
-          category_uid, account_uid, title, price, discount,
-          warehouse_location, product_description,
-          short_description, inventory, product_weight, available_sizes,
-          available_colors, size, color, is_new, note
-        })
 
         const { rows } = await query(QueryString.InsertProduct(), [
           category_uid, account_uid, title, price, discount,
           warehouse_location, product_description,
           short_description, inventory, product_weight, available_sizes?.join(','),
-          available_colors?.join(','), size, color, is_new, note
+          available_colors?.join(','), is_new, note
         ]);
-
-        console.log(`rows`, { rows })
 
         return rows[0];
       },
@@ -189,8 +178,6 @@ const Mutation = new GraphQLObjectType({
         product_weight: { type: GraphQLInt },
         available_sizes: { type: new GraphQLList(GraphQLString) },
         available_colors: { type: new GraphQLList(GraphQLString) },
-        size: { type: GraphQLString },
-        color: { type: GraphQLString },
         is_new: { type: GraphQLBoolean },
         note: { type: GraphQLString },
       },
@@ -199,14 +186,14 @@ const Mutation = new GraphQLObjectType({
         { product_uid, category_uid, title, price, discount,
           warehouse_location, product_description,
           short_description, inventory, product_weight,
-          available_sizes, available_colors, size, color, is_new, note }
+          available_sizes, available_colors, is_new, note }
       ) {
 
         const { rows } = await query(QueryString.UpdateProduct(), [
           product_uid, category_uid, title, price, discount, warehouse_location,
           product_description, short_description, inventory,
           product_weight, available_sizes?.join(','), available_colors?.join(','),
-          size, color, is_new, note
+          is_new, note
         ]);
 
         return rows[0];

@@ -63,8 +63,6 @@ export const ProductType = new GraphQLObjectType({
     product_weight: { type: GraphQLInt },
     available_sizes: { type: new GraphQLList(GraphQLString) },
     available_colors: { type: new GraphQLList(GraphQLString) },
-    size: { type: GraphQLString },
-    color: { type: GraphQLString },
     is_new: { type: GraphQLBoolean },
     note: { type: GraphQLString },
     thumbnail: { type: new GraphQLList(IMGType) },

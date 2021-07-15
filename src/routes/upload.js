@@ -8,62 +8,57 @@ import { deleteObject } from '../lib/S3'
 
 const router = Router();
 
-// const PublicKEY = fs.readFileSync('../config/jwtRS256.key.pub', 'utf8');
-
+const PublicKEY = fs.readFileSync('./src/config/jwtRS256.key.pub', 'utf8');
 
 async function Authorization(req, res, next) {
 
   // Token Validation
-  // try {
-  //   let results = null
-  //   const bearerHeader = req.headers.authorization
+  try {
+    let results = null
+    const bearerHeader = req.headers.authorization
 
-  //   const IpAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress
+    const IpAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress
 
-  //   if (!bearerHeader) {
-  //     // Show IP address
-  //     // throw new Error('No credentials sent!')
-  //     console.log(`Error: No credentials sent!, ip:${IpAddress}`)
-  //     return res.status(403).send({ error: { message: 'Unauthorized access' } })
-  //   }
+    if (!bearerHeader) {
+      // Show IP address
+      console.log(`Error: No credentials sent!, ip:${IpAddress}`)
+      return res.status(403).send({ error: { message: 'Unauthorized access' } })
+    }
 
-  //   const bearer = bearerHeader.split(' ');
-  //   const bearerToken = bearer[1];
-  //   const jwtUserToken = bearerToken;
+    const bearer = bearerHeader.split(' ');
+    const bearerToken = bearer[1];
+    const jwtUserToken = bearerToken;
 
-  //   const UserInfo = jwt.verify(jwtUserToken, PublicKEY, {
-  //     algorithm: ['RS256']
-  //   });
+    const UserInfo = jwt.verify(jwtUserToken, PublicKEY, {
+      algorithm: ['RS256']
+    });
 
-  //   const account_uid = UserInfo?.account_uid
+    const account_uid = UserInfo?.account_uid
 
-  //   if (account_uid) {
-  //     const { rows } = await query('SELECT * FROM accounts WHERE account_uid = $1', [
-  //       account_uid,
-  //     ]);
-  //     results = rows[0];
-  //   } else {
-  //     // throw new Error("Error: account_uid is undefined")
-  //     console.log(`Error: account_uid:${account_uid}, ip:${IpAddress}`)
-  //     return res.status(403).send({ error: { message: 'Unknown Error' } })
-  //   }
+    if (account_uid) {
+      const { rows } = await query('SELECT * FROM accounts WHERE account_uid = $1', [
+        account_uid,
+      ]);
+      results = rows[0];
+    } else {
+      console.log(`Error: account_uid:${account_uid}, ip:${IpAddress}`)
+      return res.status(403).send({ error: { message: 'Unknown Error' } })
+    }
 
-  //   if (results && results?.is_active) {
-  //     req.userId = results.account_uid
-  //     req.privileges = results.privileges
-  //   } else if (!results) {
-  //     // throw new Error("Error: User not found")
-  //     console.log(`Error: User ${account_uid} not found. ip:${IpAddress}`)
-  //     return res.status(403).send({ error: { message: 'Unknown Error' } })
-  //   } else {
-  //     // throw new Error(`User ${account_uid} Not Active.`)
-  //     return res.status(403).send({ error: { message: 'Error: Account is not active.' } })
-  //   }
+    if (results && results?.is_active) {
+      req.userId = results.account_uid
+      req.privileges = results.privileges
+    } else if (!results) {
+      console.log(`Error: User ${account_uid} not found. ip:${IpAddress}`)
+      return res.status(403).send({ error: { message: 'Unknown Error' } })
+    } else {
+      return res.status(403).send({ error: { message: 'Error: Account is not active.' } })
+    }
 
-  // } catch (err) {
-  //   console.log('err :>> ', err);
-  //   return next(err)
-  // }
+  } catch (err) {
+    console.log('err :>> ', err);
+    return next(err)
+  }
   return next();
 }
 
@@ -72,7 +67,7 @@ router.route('/')
   .all(Authorization)
   .post(async (req, res) => {
 
-    const { image: url, title, index, product_uid } = req.body
+    const { image: url, index, product_uid } = req.body
 
     const ImageIndex = Number(index)
 
@@ -80,9 +75,29 @@ router.route('/')
 
     try {
 
+      if (ImageIndex === 0) {
+
+        const { rows: thumbnail } = await query(QueryString.CheckThumbnail(), [
+          product_uid,
+        ]);
+
+        if (thumbnail[0]?.thumbnail) {
+          return res.status(401).json({ success: false, error: { message: 'Product thumbnail already exist!' } });
+        }
+
+      }
+
+      const { rows: product } = await query(`SELECT title from products WHERE product_uid = $1`, [
+        product_uid,
+      ]);
+
+      if (!product[0]?.title) {
+        return res.status(500).json({ success: false, error: { message: 'Product title does not exist!' } });
+      }
+
       const { image, error } = await UploadImageByUrl(
         url,
-        title
+        product[0]?.title
       );
 
 
@@ -91,18 +106,13 @@ router.route('/')
       }
 
       if (!error) {
-        console.log(`error`, { error, is: ImageIndex === 0, ImageIndex })
 
-        // Get the product title
-
-        const { rows } = await query(QueryString.InsertImage(), [
+        await query(QueryString.InsertImage(), [
           product_uid,
           image.path,
           ImageIndex === 0,
           ImageIndex
         ]);
-
-        console.log(`rows`, rows)
 
         return res.status(200).json({ success: true });
       }
