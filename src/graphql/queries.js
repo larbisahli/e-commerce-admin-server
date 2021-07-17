@@ -79,3 +79,10 @@ const IMGType = new GraphQLObjectType({
     image: { type: GraphQLString }
   }),
 });
+
+export const ProductsCountType = new GraphQLObjectType({
+  name: 'ProductsCount',
+  fields: () => ({
+    count: { type: GraphQLInt },
+  }),
+});

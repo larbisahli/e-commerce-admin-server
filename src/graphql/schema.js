@@ -12,6 +12,7 @@ import {
 import {
   ProductType,
   CategoryType,
+  ProductsCountType
 } from './queries';
 
 // const ENV = process.env;
@@ -57,7 +58,7 @@ const RootQuery = new GraphQLObjectType({
       },
     },
     Products: {
-      type: ProductType,
+      type: new GraphQLList(ProductType),
       args: {
         account_uid: { type: GraphQLID },
         category_uid: { type: GraphQLID },
@@ -69,7 +70,7 @@ const RootQuery = new GraphQLObjectType({
         { account_uid, category_uid, page, limit }
       ) {
 
-        const offset = (page - 1) * limit;
+        const offset = page === 0 ? 0 : (page - 1) * limit;
 
         const { rows } = await query(QueryString.Products(), [
           category_uid,
@@ -79,6 +80,14 @@ const RootQuery = new GraphQLObjectType({
         ]);
 
         return rows;
+      },
+    },
+    ProductsCount: {
+      type: ProductsCountType,
+      args: {},
+      async resolve() {
+        const { rows } = await query(QueryString.ProductCount());
+        return rows[0];
       },
     }
   },

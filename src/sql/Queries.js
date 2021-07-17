@@ -27,8 +27,10 @@ const UpdateCategory = () => {
 // **** (products) Table Queries ****
 
 const Products = () => {
-    return `SELECT product_uid, category_uid, title, price FROM products 
-            WHERE category_uid = $1 AND account_uid = $2 LIMIT $3 OFFSET $4`
+    return `SELECT pd.product_uid, pd.category_uid, pd.account_uid, pd.title, pd.price, pd.discount, pd.inventory,
+    ARRAY(SELECT json_build_object('image', img.image_path, 'image_uid', img.image_uid) 
+    FROM images img WHERE img.product_uid = pd.product_uid AND img.thumbnail = true) AS thumbnail FROM products pd
+    WHERE pd.category_uid = $1 AND pd.account_uid = $2 LIMIT $3 OFFSET $4`
 }
 
 const Product = () => {
@@ -43,16 +45,9 @@ const Product = () => {
     FROM products pd WHERE pd.product_uid = $1`
 }
 
-// const Product = () => {
-//     return `
-//     SELECT pd.product_uid, category_uid, account_uid, 
-//     title, price, discount, warehouse_location, 
-//     product_description, short_description, inventory, product_weight, 
-//     available_sizes, available_colors, is_new, note,
-//     array_remove(array_agg(CASE WHEN img.thumbnail = true THEN img.image_path ELSE NULL END), NULL) AS thumbnail,
-//     array_remove(array_agg(CASE WHEN img.thumbnail = false THEN img.image_path ELSE NULL END ORDER BY img.display_order), NULL) AS gallery 
-//     FROM products pd LEFT JOIN images img USING(product_uid) WHERE pd.product_uid = $1 GROUP BY pd.product_uid`
-// }
+const ProductCount = () => {
+    return `SELECT count(product_uid) From products`
+}
 
 const InsertProduct = () => {
     return `
@@ -102,6 +97,7 @@ module.exports = {
     Product,
     UpdateProduct,
     InsertProduct,
+    ProductCount,
     InsertImage,
     DeleteImage,
     CheckThumbnail
