@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { query } from '../db';
 import cookie from 'cookie';
-import fs from 'fs'
+import fs from 'fs';
 
 let router = Router();
 require('dotenv').config();
@@ -35,9 +35,18 @@ router
 
       const results = rows[0];
 
+      console.log(`results`, results);
+
       if (results && results.is_active) {
         /* Define variables */
-        const { account_uid, first_name, last_name, email, password_hash, privileges } = results
+        const {
+          account_uid,
+          first_name,
+          last_name,
+          email,
+          password_hash,
+          privileges,
+        } = results;
         /* Check and compare password */
         bcrypt.compare(password, password_hash).then((isMatch) => {
           /* User matched */
@@ -53,55 +62,52 @@ router
             // Sign Options
             const SignOptions = {
               expiresIn: remember_me ? '7d' : '1d',
-              algorithm: "RS256"
-            }
+              algorithm: 'RS256',
+            };
             /* Sign token */
-            jwt.sign(
-              payload,
-              PrivateKEY,
-              SignOptions,
-              (err, token) => {
-                if (err) {
-                  res.status(400).json({
-                    message: 'There was a problem with your Token.',
-                  });
-                }
-                res.setHeader(
-                  'set-Cookie',
-                  cookie.serialize('DGALA-TOKEN', token, {
-                    httpOnly: true,
-                    secure: true,
-                    maxAge: remember_me ? (7 * 86400) : (86400),
-                    sameSite: 'Strict',
-                    path: '/',
-                  })
-                );
-                console.log('token :>> ', token);
-                res.status(200).json({
-                  success: true,
+            jwt.sign(payload, PrivateKEY, SignOptions, (err, token) => {
+              if (err) {
+                res.status(400).json({
+                  message: 'There was a problem with your Token.',
+                  success: false,
                 });
               }
-            );
+              res.setHeader(
+                'set-Cookie',
+                cookie.serialize('DGALA-TOKEN', token, {
+                  httpOnly: true,
+                  secure: true,
+                  maxAge: remember_me ? 7 * 86400 : 86400,
+                  sameSite: 'Strict',
+                  path: '/',
+                })
+              );
+              res.status(200).json({
+                success: true,
+              });
+            });
           } else {
             res
               .status(403)
-              .json({ message: 'Password incorrect' });
+              .json({ message: 'Password incorrect', success: false });
           }
         });
       } else if (!results) {
         res.status(400).json({
           message: 'User not found.',
+          success: false,
         });
       } else if (!results.is_active) {
         res.status(400).json({
           message: 'User is not active.',
+          success: false,
         });
       }
     } catch (error) {
       console.log('error :>> ', error);
       res.status(500).json({
-        success: false,
         message: 'Oops! something went wrong.',
+        success: false,
       });
     }
   });

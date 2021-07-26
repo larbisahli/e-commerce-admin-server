@@ -19,6 +19,6 @@ jobs:
             cd admin-server
             git checkout main
             git pull
-            echo ${{ secrets.USER_PASSWORD }} | sudo -S docker-compose rm -sv admin_server
-            echo ${{ secrets.USER_PASSWORD }} | sudo -S docker-compose up -d --no-deps --build admin_server
             echo 'Successfully Deploy to DigitalOcean'
+          # echo ${{ secrets.USER_PASSWORD }} | sudo -S docker-compose rm -sv admin_server
+          # echo ${{ secrets.USER_PASSWORD }} | sudo -S docker-compose up -d --no-deps --build admin_server
