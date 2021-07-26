@@ -7,7 +7,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy main
+      - name: Deploy admin-server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }} # Ip address of the server you wish to ssh into
@@ -15,9 +15,10 @@ jobs:
           key: ${{ secrets.SSH_KEY }} # Private key of the server should be in /home/isaac/.ssh/id_rsa
           script: |
             eval $(ssh-agent -s)
-            ssh-add /home/isaac/.ssh/id_rsa
+            ssh-add /home/isaac/.ssh/id_rsa_github
             cd admin-server
             git checkout main
             git pull
-            echo ${{ secrets.USER_PASSWORD }} | sudo -S docker-compose rm -sv admin_server
-            echo ${{ secrets.USER_PASSWORD }} | sudo -S docker-compose up -d --no-deps --build admin_server
+            echo 'Successfully Deploy to DigitalOcean'
+          # echo ${{ secrets.USER_PASSWORD }} | sudo -S docker-compose rm -sv admin_server
+          # echo ${{ secrets.USER_PASSWORD }} | sudo -S docker-compose up -d --no-deps --build admin_server

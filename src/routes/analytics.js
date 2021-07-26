@@ -8,11 +8,11 @@ import { promisify } from 'util';
 const ENV = process.env;
 const PROD_NODE_ENV = ENV.NODE_ENV === 'production';
 
-const client = redis.createClient({
-  host: PROD_NODE_ENV ? 'redis' : '127.0.0.1',
-  port: 6379,
-  password: process.env.REDIS_PASSWORD,
-});
+// const client = redis.createClient({
+//   host: PROD_NODE_ENV ? 'redis' : '127.0.0.1',
+//   port: 6379,
+//   password: process.env.REDIS_PASSWORD,
+// });
 
 let router = Router();
 

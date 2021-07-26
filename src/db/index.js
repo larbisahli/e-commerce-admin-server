@@ -6,30 +6,34 @@ require('dotenv').config();
 const ENV = process.env;
 const PROD_NODE_ENV = ENV.NODE_ENV === 'production';
 
+// const pool = new Pool({
+//   host: PROD_NODE_ENV ? ENV.DB_HOST_PROD : ENV.DB_HOST_DEV,
+//   port: PROD_NODE_ENV ? 5432 : 5422,
+//   user: PROD_NODE_ENV ? ENV.DB_USER_PROD : ENV.DB_USER_DEV,
+//   password: PROD_NODE_ENV ? ENV.DB_PASSWORD_PROD : ENV.DB_PASSWORD_DEV,
+//   database: PROD_NODE_ENV ? ENV.DB_NAME_PROD : ENV.DB_NAME_DEV,
+//   max: 20,
+// });
+
 const pool = new Pool({
-  host: PROD_NODE_ENV ? ENV.DB_HOST_PROD : ENV.DB_HOST_DEV,
-  port: PROD_NODE_ENV ? 5432 : 5422,
-  user: PROD_NODE_ENV ? ENV.DB_USER_PROD : ENV.DB_USER_DEV,
-  password: PROD_NODE_ENV ? ENV.DB_PASSWORD_PROD : ENV.DB_PASSWORD_DEV,
-  database: PROD_NODE_ENV ? ENV.DB_NAME_PROD : ENV.DB_NAME_DEV,
+  host: ENV.DB_HOST_DEV_,
+  port: 5432,
+  user: ENV.DB_USER_DEV,
+  password: ENV.DB_PASSWORD_DEV,
+  database: ENV.DB_NAME_DEV,
   max: 20,
 });
-
-// const pool = new Pool({
-//   host: ENV.DB_HOST_DEV,
-//   port: 5422,
-//   user: ENV.DB_USER_PROD,
-//   password: ENV.DB_PASSWORD_PROD,
-//   database: ENV.DB_NAME_PROD,
-//   max: 20
-// });
 
 // pool.on('connect', (client) => {
 //   client.on('notice', (msg) => console.log('notice', msg.message));
 // });
 
 async function query(text, params) {
-  return await pool.query(text, params);
+  try {
+    return await pool.query(text, params);
+  } catch (error) {
+    console.log(`db Error :>`, { error })
+  }
 }
 
 async function getClient() {
