@@ -6,9 +6,8 @@ services:
     build: .
     ports:
       - '5001:5001'
-    networks:
-      - backend-network
 
 networks:
-  backend-network:
-    driver: bridge
+  default:
+    external:
+      name: backend-network

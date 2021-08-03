@@ -174,7 +174,7 @@ app.use(
 
 mountRoutes(app);
 
-const PORT = process.env.PORT || 5001;
+const PORT = 5001;
 
 app.listen(PORT, (error) => {
   if (error) return console.log('Express Server ERROR:>> ', error);
