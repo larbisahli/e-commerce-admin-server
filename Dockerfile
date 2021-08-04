@@ -7,6 +7,7 @@ COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
 COPY . .
+COPY ./src/config ./
 
 EXPOSE 5001
 
