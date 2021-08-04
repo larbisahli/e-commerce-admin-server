@@ -5,7 +5,7 @@ services:
     restart: always
     build: .
     ports:
-      - '5001:5001'
+      - '5001'
 
 networks:
   default:
