@@ -2,7 +2,7 @@ name: Build & Deploy
 
 on:
   push:
-    branches: [develop]
+    branches: [main]
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -17,8 +17,8 @@ jobs:
             eval $(ssh-agent -s)
             ssh-add /home/isaac/.ssh/id_rsa_github
             cd admin-server
-            git checkout develop
-            git pull origin develop
+            git checkout main
+            git pull
             echo 'Successfully Deploy to DigitalOcean'
           # echo ${{ secrets.USER_PASSWORD }} | sudo -S docker-compose rm -sv admin_server
           # echo ${{ secrets.USER_PASSWORD }} | sudo -S docker-compose up -d --no-deps --build admin_server
