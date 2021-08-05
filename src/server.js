@@ -10,7 +10,6 @@ import slowDown from 'express-slow-down';
 import RedisStore from 'rate-limit-redis';
 import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
-import fs from 'fs';
 import { query } from './db';
 import formData from 'express-form-data'
 import PublicKEY from './lib/jwtPublicKey'
@@ -23,8 +22,6 @@ app.set('trust proxy', true);
 
 const ENV = process.env;
 const DEV_NODE_ENV = ENV.NODE_ENV !== 'production';
-
-if (!fs.existsSync('./src/temp')) fs.mkdirSync('./src/temp');
 
 const client = redis.createClient({
   host: DEV_NODE_ENV ? '127.0.0.1' : 'redis',
@@ -42,12 +39,8 @@ const speedLimiter = new slowDown({
 });
 
 var whitelist = [
-  'http://127.0.0.1',
-  'http://127.0.0.1:3000',
-  'http://192.168.1.108',
-  'http://192.168.1.108:3000',
+  'http://127.0.0.1:3001',
   'https://admin.dropgala.com/',
-  'http://dropgala.ddns.net/',
 ];
 
 app.use(
@@ -87,8 +80,7 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.use(
-  '/admin-api/graphql',
+app.use('/graphql',
   async (req, res, next) => {
     // Token Validation
     try {
