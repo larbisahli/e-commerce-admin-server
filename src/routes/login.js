@@ -4,11 +4,20 @@ import bcrypt from 'bcryptjs';
 import { query } from '../db';
 import cookie from 'cookie';
 import fs from 'fs';
+import path from 'path'
 
 let router = Router();
 require('dotenv').config();
 
-const PrivateKEY = fs.readFileSync('./src/config/jwtRS256.key', 'utf8');
+let PrivateKEY = null
+
+if (process.env.NODE_ENV === 'production') {
+  const jwtRS256File = path.join(process.cwd(), "jwtRS256.key")
+  PrivateKEY = fs.readFileSync(jwtRS256File, 'utf8');
+
+} else {
+  PrivateKEY = fs.readFileSync('./src/config/jwtRS256.key', 'utf8');
+}
 
 router
   .route('/')

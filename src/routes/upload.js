@@ -1,14 +1,12 @@
 import { Router } from 'express';
 import UploadImageByUrl from '../lib/upload'
 import jwt from 'jsonwebtoken';
-import fs from 'fs';
 import { query } from '../db';
 import QueryString from '../sql/Queries';
 import { deleteObject } from '../lib/S3'
+import PublicKEY from '../lib/jwtPublicKey'
 
 const router = Router();
-
-const PublicKEY = fs.readFileSync('./src/config/jwtRS256.key.pub', 'utf8');
 
 async function Authorization(req, res, next) {
 

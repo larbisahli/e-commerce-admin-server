@@ -13,9 +13,7 @@ import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import { query } from './db';
 import formData from 'express-form-data'
-
-
-const PublicKEY = fs.readFileSync('./src/config/jwtRS256.key.pub', 'utf8');
+import PublicKEY from './lib/jwtPublicKey'
 
 require('dotenv').config();
 
