@@ -89,6 +89,7 @@ router
                   maxAge: remember_me ? 7 * 86400 : 86400,
                   sameSite: 'Strict',
                   path: '/',
+                  domain: 'dropgala.com'
                 })
               );
               res.status(200).json({

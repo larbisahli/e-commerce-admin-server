@@ -20,6 +20,6 @@ jobs:
             git checkout main
             git pull
             echo ${{ secrets.USER_PASSWORD }} | sudo -S docker-compose down
-            echo ${{ secrets.USER_PASSWORD }} | sudo -S docker-compose up --build
+            echo ${{ secrets.USER_PASSWORD }} | sudo -S docker-compose up -d --build
             echo 'Successfully Deploy to DigitalOcean'
 
