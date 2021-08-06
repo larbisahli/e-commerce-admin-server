@@ -38,22 +38,9 @@ const speedLimiter = new slowDown({
   delayMs: 100, // begin adding 100ms of delay per request above 10
 });
 
-var whitelist = [
-  'http://127.0.0.1:3001',
-  'https://admin.dropgala.com/',
-];
-
 app.use(
   cors({
-    origin: function (origin, callback) {
-      console.log('<<: origin :>> ', origin);
-      if (origin && whitelist.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(null, false);
-      }
-    },
-    credentials: true,
+    origin: 'https://admin.dropgala.com',
   })
 );
 
@@ -75,7 +62,7 @@ app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE');
   res.header(
     'Access-Control-Allow-Headers',
-    'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept, multipart/form-data'
+    'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept'
   );
   next();
 });
