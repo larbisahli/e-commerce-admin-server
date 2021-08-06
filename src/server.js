@@ -61,11 +61,6 @@ app.use(
 app.use('/graphql',
   async (req, res, next) => {
 
-    // res.header('Access-Control-Allow-Credentials', true);
-    // res.header('Access-Control-Allow-Origin', 'https://admin.dropgala.com');
-    // res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE');
-
-
     // Token Validation
     try {
 
