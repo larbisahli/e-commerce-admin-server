@@ -38,11 +38,6 @@ const speedLimiter = new slowDown({
   delayMs: 100, // begin adding 100ms of delay per request above 10
 });
 
-app.use(
-  cors({
-    origin: 'https://admin.dropgala.com',
-  })
-);
 
 app.use(express.json({ limit: '16mb', extended: true }));
 
@@ -56,16 +51,22 @@ app.use(helmet());
 
 app.use(speedLimiter);
 
-app.use(function (req, res, next) {
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Origin', 'https://admin.dropgala.com');
-  res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept'
-  );
-  next();
-});
+app.use(
+  cors({
+    origin: 'https://admin.dropgala.com',
+  })
+);
+
+// app.use(function (req, res, next) {
+//   res.header('Access-Control-Allow-Credentials', true);
+//   // res.header('Access-Control-Allow-Origin', 'https://admin.dropgala.com');
+//   res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE');
+//   res.header(
+//     'Access-Control-Allow-Headers',
+//     'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept'
+//   );
+//   next();
+// });
 
 app.use('/graphql',
   async (req, res, next) => {
