@@ -12,7 +12,9 @@ import {
 import {
   ProductType,
   CategoryType,
-  ProductsCountType
+  ProductsCountType,
+  AttributeType,
+  OptionType
 } from './queries';
 
 // const ENV = process.env;
@@ -89,7 +91,41 @@ const RootQuery = new GraphQLObjectType({
         const { rows } = await query(QueryString.ProductCount());
         return rows[0];
       },
-    }
+    },
+    attribute: {
+      type: AttributeType,
+      args: {
+        attribute_uid: { type: GraphQLID },
+      },
+      async resolve(
+        parent,
+        { attribute_uid }
+      ) {
+
+        const { rows } = await query(QueryString.Attribute(), [
+          attribute_uid,
+        ]);
+
+        return rows[0];
+      },
+    },
+    attributes: {
+      type: AttributeType,
+      args: {
+        product_uid: { type: GraphQLID },
+      },
+      async resolve(
+        parent,
+        { product_uid }
+      ) {
+
+        const { rows } = await query(QueryString.Attributes(), [
+          product_uid,
+        ]);
+
+        return rows;
+      },
+    },
   },
 });
 
@@ -204,6 +240,77 @@ const Mutation = new GraphQLObjectType({
           product_weight, available_sizes?.join(','), available_colors?.join(','),
           is_new, note
         ]);
+
+        return rows[0];
+      },
+    },
+    CreateAttribute: {
+      type: AttributeType,
+      args: {
+        product_uid: { type: GraphQLID },
+        attribute_name: { type: GraphQLString },
+        options: { type: new GraphQLList(OptionType) },
+      },
+      async resolve(
+        parent,
+        { product_uid, attribute_name, options }
+      ) {
+
+        // **** TRANSACTION ****
+        const { rows } = await query(QueryString.InsertAttribute(), [product_uid, attribute_name]);
+        // options
+
+        return rows[0];
+      },
+    },
+    UpdateAttribute: {
+      type: AttributeType,
+      args: {
+        attribute_uid: { type: GraphQLID },
+        attribute_name: { type: GraphQLString },
+      },
+      async resolve(
+        parent,
+        { attribute_uid, attribute_name }
+      ) {
+
+        const { rows } = await query(QueryString.UpdateAttribute(), [attribute_uid, attribute_name]);
+
+        return rows[0];
+      },
+    },
+    CreateOption: {
+      type: OptionType,
+      args: {
+        attribute_uid: { type: GraphQLID },
+        option_name: { type: GraphQLString },
+        additional_price: { type: GraphQLInt },
+        color_hex: { type: GraphQLString },
+      },
+      async resolve(
+        parent,
+        { attribute_uid, option_name, additional_price, color_hex }
+      ) {
+
+        const { rows } = await query(QueryString.InsertOption(), [attribute_uid, option_name, additional_price, color_hex]);
+
+        return rows[0];
+      },
+    },
+    UpdateOption: {
+      type: OptionType,
+      args: {
+        option_uid: { type: GraphQLID },
+        option_name: { type: GraphQLString },
+        additional_price: { type: GraphQLInt },
+        color_hex: { type: GraphQLString },
+      },
+      async resolve(
+        parent,
+        { option_uid, option_name, additional_price, color_hex }
+      ) {
+
+        const { rows } = await query(QueryString.UpdateOption(), [option_uid, option_name, additional_price, color_hex]);
 
         return rows[0];
       },

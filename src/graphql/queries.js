@@ -37,7 +37,7 @@ export const ProfileType = new GraphQLObjectType({
 });
 
 export const CategoryType = new GraphQLObjectType({
-  name: 'categories',
+  name: 'category',
   fields: () => ({
     category_uid: { type: GraphQLID },
     category_name: { type: GraphQLString },
@@ -84,5 +84,26 @@ export const ProductsCountType = new GraphQLObjectType({
   name: 'ProductsCount',
   fields: () => ({
     count: { type: GraphQLInt },
+  }),
+});
+
+export const AttributeType = new GraphQLObjectType({
+  name: 'attributes',
+  fields: () => ({
+    attribute_uid: { type: GraphQLID },
+    product_uid: { type: GraphQLID },
+    attribute_name: { type: GraphQLString },
+    options: { type: new GraphQLList(OptionType) },
+  }),
+});
+
+export const OptionType = new GraphQLObjectType({
+  name: 'option',
+  fields: () => ({
+    option_uid: { type: GraphQLID },
+    attribute_uid: { type: GraphQLID },
+    option_name: { type: GraphQLString },
+    additional_price: { type: GraphQLInt },
+    color_hex: { type: GraphQLString },
   }),
 });

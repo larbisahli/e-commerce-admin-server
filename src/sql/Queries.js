@@ -88,6 +88,34 @@ const CheckThumbnail = () => {
     return `SELECT thumbnail from images WHERE product_uid = $1 AND thumbnail = true`
 }
 
+// **** (attributes) Table Queries ****
+
+const Attribute = () => {
+    return `SELECT attribute_uid, product_uid, attribute_name FROM attributes WHERE attribute_uid = $1`;
+};
+
+const Attributes = () => {
+    return `SELECT attribute_uid, product_uid, attribute_name FROM attributes WHERE attribute_uid = $1`;
+};
+
+const InsertAttribute = () => {
+    return `INSERT INTO attributes(product_uid, attribute_name) VALUES($1, $2) RETURNING attribute_uid`;
+};
+
+const UpdateAttribute = () => {
+    return `UPDATE attributes SET attribute_name = $2 WHERE attribute_uid = $1 RETURNING attribute_uid`;
+};
+
+// **** (options) Table Queries ****
+
+const InsertOption = () => {
+    return `INSERT INTO options(attribute_uid, option_name, additional_price, color_hex) VALUES($1, $2, $3, $4) RETURNING option_uid`;
+};
+
+const UpdateOption = () => {
+    return `UPDATE options SET option_name = $2, additional_price = $3, color_hex = $4 WHERE option_uid = $1 RETURNING option_uid`;
+};
+
 module.exports = {
     Categories,
     Category,
@@ -100,5 +128,11 @@ module.exports = {
     ProductCount,
     InsertImage,
     DeleteImage,
-    CheckThumbnail
+    CheckThumbnail,
+    Attribute,
+    Attributes,
+    InsertAttribute,
+    UpdateAttribute,
+    InsertOption,
+    UpdateOption
 };
