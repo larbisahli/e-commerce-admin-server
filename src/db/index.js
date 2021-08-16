@@ -19,7 +19,7 @@ async function query(text, params) {
   try {
     return await pool.query(text, params);
   } catch (error) {
-    console.log(`db Error :>`, { error })
+    console.log(`db Error :>`, { error });
   }
 }
 

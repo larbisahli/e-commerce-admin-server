@@ -4,17 +4,19 @@ import bcrypt from 'bcryptjs';
 import { query } from '../db';
 import cookie from 'cookie';
 import fs from 'fs';
-import path from 'path'
+import path from 'path';
+
+const ENV = process.env;
+const DEV_NODE_ENV = ENV.NODE_ENV !== 'production';
 
 let router = Router();
 require('dotenv').config();
 
-let PrivateKEY = null
+let PrivateKEY = null;
 
 if (process.env.NODE_ENV === 'production') {
-  const jwtRS256File = path.join(process.cwd(), "jwtRS256.key")
+  const jwtRS256File = path.join(process.cwd(), 'jwtRS256.key');
   PrivateKEY = fs.readFileSync(jwtRS256File, 'utf8');
-
 } else {
   PrivateKEY = fs.readFileSync('./src/config/jwtRS256.key', 'utf8');
 }
@@ -89,7 +91,7 @@ router
                   maxAge: remember_me ? 7 * 86400 : 86400,
                   sameSite: 'Strict',
                   path: '/',
-                  domain: 'dropgala.com'
+                  domain: DEV_NODE_ENV ? '127.0.0.1' : 'dropgala.com',
                 })
               );
               res.status(200).json({

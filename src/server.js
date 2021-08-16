@@ -11,8 +11,8 @@ import RedisStore from 'rate-limit-redis';
 import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
 import { query } from './db';
-import formData from 'express-form-data'
-import PublicKEY from './lib/jwtPublicKey'
+import formData from 'express-form-data';
+import PublicKEY from './lib/jwtPublicKey';
 
 require('dotenv').config();
 
@@ -38,14 +38,13 @@ const speedLimiter = new slowDown({
   delayMs: 100, // begin adding 100ms of delay per request above 10
 });
 
-
 app.use(express.json({ limit: '16mb', extended: true }));
 
 app.use(express.urlencoded({ limit: '16mb', extended: true }));
 
 app.use(cookieParser());
 
-app.use(formData.parse())
+app.use(formData.parse());
 
 app.use(helmet());
 
@@ -53,33 +52,35 @@ app.use(speedLimiter);
 
 app.use(
   cors({
-    origin: 'https://admin.dropgala.com',
+    origin: DEV_NODE_ENV
+      ? 'http://127.0.0.1:3001'
+      : 'https://admin.dropgala.com',
     credentials: true,
   })
 );
 
-app.use('/graphql',
+app.use(
+  '/graphql',
   async (req, res, next) => {
-
     // Token Validation
     try {
-
       if (!req.headers.authorization) {
-        return res.status(403).send({ message: "Unknown Error" })
+        return res.status(403).send({ message: 'Unknown Error' });
       }
 
-      let results = null
-      const bearerHeader = req.headers.authorization
+      let results = null;
+      const bearerHeader = req.headers.authorization;
 
-      const IpAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress
+      const IpAddress =
+        req.headers['x-forwarded-for'] || req.connection.remoteAddress;
       // const cookies = req.cookies;
       // const jwtUserToken = cookies['DGALA-TOKEN']
 
       if (!bearerHeader) {
         // Show IP address
         // throw new Error('No credentials sent!')
-        console.log(`Error: No credentials sent!, ip:${IpAddress}`)
-        return res.status(403).send({ message: "Unknown Error" })
+        console.log(`Error: No credentials sent!, ip:${IpAddress}`);
+        return res.status(403).send({ message: 'Unknown Error' });
       }
 
       const bearer = bearerHeader.split(' ');
@@ -87,37 +88,39 @@ app.use('/graphql',
       const jwtUserToken = bearerToken;
 
       const UserInfo = jwt.verify(jwtUserToken, PublicKEY, {
-        algorithm: ['RS256']
+        algorithm: ['RS256'],
       });
 
-      const account_uid = UserInfo?.account_uid
+      const account_uid = UserInfo?.account_uid;
 
       if (account_uid) {
-        const { rows } = await query('SELECT * FROM accounts WHERE account_uid = $1', [
-          account_uid,
-        ]);
+        const { rows } = await query(
+          'SELECT * FROM accounts WHERE account_uid = $1',
+          [account_uid]
+        );
         results = rows[0];
       } else {
         // throw new Error("Error: account_uid is undefined")
-        console.log(`Error: account_uid:${account_uid}, ip:${IpAddress}`)
-        return res.status(403).send({ message: "Unknown Error" })
+        console.log(`Error: account_uid:${account_uid}, ip:${IpAddress}`);
+        return res.status(403).send({ message: 'Unknown Error' });
       }
 
       if (results && results?.is_active) {
-        req.userId = results.account_uid
-        req.privileges = results.privileges
+        req.userId = results.account_uid;
+        req.privileges = results.privileges;
       } else if (!results) {
         // throw new Error("Error: User not found")
-        console.log(`Error: User ${account_uid} not found. ip:${IpAddress}`)
-        return res.status(403).send({ message: "Unknown Error" })
+        console.log(`Error: User ${account_uid} not found. ip:${IpAddress}`);
+        return res.status(403).send({ message: 'Unknown Error' });
       } else {
         // throw new Error(`User ${account_uid} Not Active.`)
-        return res.status(403).send({ message: 'Error: Account is not active.' })
+        return res
+          .status(403)
+          .send({ message: 'Error: Account is not active.' });
       }
-
     } catch (err) {
       console.log('err :>> ', err);
-      return next(err)
+      return next(err);
     }
     return next();
   },

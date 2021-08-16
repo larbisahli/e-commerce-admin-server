@@ -1,4 +1,4 @@
-import { query } from '../db';
+import { query, getClient } from '../db';
 import QueryString from '../sql/Queries';
 import {
   GraphQLObjectType,
@@ -8,13 +8,15 @@ import {
   GraphQLSchema,
   GraphQLString,
   GraphQLBoolean,
+  GraphQLFloat,
 } from 'graphql';
 import {
   ProductType,
   CategoryType,
   ProductsCountType,
   AttributeType,
-  OptionType
+  OptionType,
+  OptionInputType,
 } from './queries';
 
 // const ENV = process.env;
@@ -47,14 +49,8 @@ const RootQuery = new GraphQLObjectType({
       args: {
         product_uid: { type: GraphQLID },
       },
-      async resolve(
-        parent,
-        { product_uid }
-      ) {
-
-        const { rows } = await query(QueryString.Product(), [
-          product_uid,
-        ]);
+      async resolve(parent, { product_uid }) {
+        const { rows } = await query(QueryString.Product(), [product_uid]);
 
         return rows[0];
       },
@@ -67,18 +63,14 @@ const RootQuery = new GraphQLObjectType({
         page: { type: GraphQLInt },
         limit: { type: GraphQLInt },
       },
-      async resolve(
-        parent,
-        { account_uid, category_uid, page, limit }
-      ) {
-
+      async resolve(parent, { account_uid, category_uid, page, limit }) {
         const offset = page === 0 ? 0 : (page - 1) * limit;
 
         const { rows } = await query(QueryString.Products(), [
           category_uid,
           account_uid,
           limit,
-          offset
+          offset,
         ]);
 
         return rows;
@@ -97,31 +89,19 @@ const RootQuery = new GraphQLObjectType({
       args: {
         attribute_uid: { type: GraphQLID },
       },
-      async resolve(
-        parent,
-        { attribute_uid }
-      ) {
-
-        const { rows } = await query(QueryString.Attribute(), [
-          attribute_uid,
-        ]);
+      async resolve(parent, { attribute_uid }) {
+        const { rows } = await query(QueryString.Attribute(), [attribute_uid]);
 
         return rows[0];
       },
     },
     attributes: {
-      type: AttributeType,
+      type: new GraphQLList(AttributeType),
       args: {
         product_uid: { type: GraphQLID },
       },
-      async resolve(
-        parent,
-        { product_uid }
-      ) {
-
-        const { rows } = await query(QueryString.Attributes(), [
-          product_uid,
-        ]);
+      async resolve(parent, { product_uid }) {
+        const { rows } = await query(QueryString.Attributes(), [product_uid]);
 
         return rows;
       },
@@ -178,33 +158,49 @@ const Mutation = new GraphQLObjectType({
         category_uid: { type: GraphQLID },
         account_uid: { type: GraphQLID },
         title: { type: GraphQLString },
-        price: { type: GraphQLInt },
-        discount: { type: GraphQLInt },
+        price: { type: GraphQLFloat },
+        discount: { type: GraphQLFloat },
         warehouse_location: { type: GraphQLString },
         product_description: { type: GraphQLString },
         short_description: { type: GraphQLString },
         inventory: { type: GraphQLInt },
-        product_weight: { type: GraphQLInt },
-        available_sizes: { type: new GraphQLList(GraphQLString) },
-        available_colors: { type: new GraphQLList(GraphQLString) },
+        product_weight: { type: GraphQLFloat },
         is_new: { type: GraphQLBoolean },
         note: { type: GraphQLString },
       },
       async resolve(
         parent,
-        { category_uid, account_uid, title, price, discount,
-          warehouse_location, product_description,
-          short_description, inventory, product_weight, available_sizes,
-          available_colors, is_new, note }
+        {
+          category_uid,
+          account_uid,
+          title,
+          price,
+          discount,
+          warehouse_location,
+          product_description,
+          short_description,
+          inventory,
+          product_weight,
+          is_new,
+          note,
+        }
       ) {
-
         const { rows } = await query(QueryString.InsertProduct(), [
-          category_uid, account_uid, title, price, discount,
-          warehouse_location, product_description,
-          short_description, inventory, product_weight, available_sizes?.join(','),
-          available_colors?.join(','), is_new, note
+          category_uid,
+          account_uid,
+          title,
+          price,
+          discount,
+          warehouse_location,
+          product_description,
+          short_description,
+          inventory,
+          product_weight,
+          is_new,
+          note,
         ]);
 
+        console.log(`rows`, rows);
         return rows[0];
       },
     },
@@ -214,31 +210,46 @@ const Mutation = new GraphQLObjectType({
         product_uid: { type: GraphQLID },
         category_uid: { type: GraphQLID },
         title: { type: GraphQLString },
-        price: { type: GraphQLInt },
-        discount: { type: GraphQLInt },
+        price: { type: GraphQLFloat },
+        discount: { type: GraphQLFloat },
         warehouse_location: { type: GraphQLString },
         product_description: { type: GraphQLString },
         short_description: { type: GraphQLString },
         inventory: { type: GraphQLInt },
-        product_weight: { type: GraphQLInt },
-        available_sizes: { type: new GraphQLList(GraphQLString) },
-        available_colors: { type: new GraphQLList(GraphQLString) },
+        product_weight: { type: GraphQLFloat },
         is_new: { type: GraphQLBoolean },
         note: { type: GraphQLString },
       },
       async resolve(
         parent,
-        { product_uid, category_uid, title, price, discount,
-          warehouse_location, product_description,
-          short_description, inventory, product_weight,
-          available_sizes, available_colors, is_new, note }
+        {
+          product_uid,
+          category_uid,
+          title,
+          price,
+          discount,
+          warehouse_location,
+          product_description,
+          short_description,
+          inventory,
+          product_weight,
+          is_new,
+          note,
+        }
       ) {
-
         const { rows } = await query(QueryString.UpdateProduct(), [
-          product_uid, category_uid, title, price, discount, warehouse_location,
-          product_description, short_description, inventory,
-          product_weight, available_sizes?.join(','), available_colors?.join(','),
-          is_new, note
+          product_uid,
+          category_uid,
+          title,
+          price,
+          discount,
+          warehouse_location,
+          product_description,
+          short_description,
+          inventory,
+          product_weight,
+          is_new,
+          note,
         ]);
 
         return rows[0];
@@ -249,18 +260,54 @@ const Mutation = new GraphQLObjectType({
       args: {
         product_uid: { type: GraphQLID },
         attribute_name: { type: GraphQLString },
-        options: { type: new GraphQLList(OptionType) },
+        options: { type: new GraphQLList(OptionInputType) },
       },
-      async resolve(
-        parent,
-        { product_uid, attribute_name, options }
-      ) {
-
+      async resolve(parent, { product_uid, attribute_name, options }) {
+        const client = await getClient();
         // **** TRANSACTION ****
-        const { rows } = await query(QueryString.InsertAttribute(), [product_uid, attribute_name]);
-        // options
 
-        return rows[0];
+        try {
+          await client.query('BEGIN');
+
+          const { rows } = await client.query(QueryString.InsertAttribute(), [
+            product_uid,
+            attribute_name,
+          ]);
+
+          // options
+
+          const { attribute_uid } = rows[0];
+
+          if (!attribute_uid) {
+            await client.query('ROLLBACK');
+            throw new Error("Couldn't insert attribute");
+          }
+
+          for await (const option of options) {
+            const Op = await client.query(QueryString.InsertOption(), [
+              attribute_uid,
+              option.option_name,
+              option.additional_price,
+              option.color_hex,
+            ]);
+
+            const option_uid = Op.rows[0].option_uid;
+            console.log(`Op =>`, Op, option_uid);
+            if (!option_uid) {
+              await client.query('ROLLBACK');
+              throw new Error("Couldn't insert option");
+            }
+          }
+
+          await client.query('COMMIT');
+
+          return rows[0];
+        } catch (err) {
+          await client.query('ROLLBACK');
+          console.log(`CreateAttribute :>`, { err, message: err.message });
+        } finally {
+          client.release();
+        }
       },
     },
     UpdateAttribute: {
@@ -269,12 +316,11 @@ const Mutation = new GraphQLObjectType({
         attribute_uid: { type: GraphQLID },
         attribute_name: { type: GraphQLString },
       },
-      async resolve(
-        parent,
-        { attribute_uid, attribute_name }
-      ) {
-
-        const { rows } = await query(QueryString.UpdateAttribute(), [attribute_uid, attribute_name]);
+      async resolve(parent, { attribute_uid, attribute_name }) {
+        const { rows } = await query(QueryString.UpdateAttribute(), [
+          attribute_uid,
+          attribute_name,
+        ]);
 
         return rows[0];
       },
@@ -291,8 +337,12 @@ const Mutation = new GraphQLObjectType({
         parent,
         { attribute_uid, option_name, additional_price, color_hex }
       ) {
-
-        const { rows } = await query(QueryString.InsertOption(), [attribute_uid, option_name, additional_price, color_hex]);
+        const { rows } = await query(QueryString.InsertOption(), [
+          attribute_uid,
+          option_name,
+          additional_price,
+          color_hex,
+        ]);
 
         return rows[0];
       },
@@ -309,12 +359,27 @@ const Mutation = new GraphQLObjectType({
         parent,
         { option_uid, option_name, additional_price, color_hex }
       ) {
-
-        const { rows } = await query(QueryString.UpdateOption(), [option_uid, option_name, additional_price, color_hex]);
+        const { rows } = await query(QueryString.UpdateOption(), [
+          option_uid,
+          option_name,
+          additional_price,
+          color_hex,
+        ]);
 
         return rows[0];
       },
-    }
+    },
+    DeleteOption: {
+      type: OptionType,
+      args: {
+        option_uid: { type: GraphQLID },
+      },
+      async resolve(parent, { option_uid }) {
+        const { rows } = await query(QueryString.DeleteOption(), [option_uid]);
+
+        return rows[0];
+      },
+    },
   },
 });
 

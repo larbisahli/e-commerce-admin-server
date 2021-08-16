@@ -1,5 +1,5 @@
 export default {
-    "warehouses": {
-        "singapore": []
-    }
-}
+  warehouses: {
+    singapore: [],
+  },
+};
