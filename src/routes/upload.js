@@ -73,8 +73,9 @@ router
 
     const ImageIndex = Number(index);
 
-    if (!product_uid)
+    if (!product_uid) {
       return res.status(403).json({ success: false, error: 'Unknown error' });
+    }
 
     try {
       if (ImageIndex === 0) {
@@ -112,16 +113,15 @@ router
         return res.status(500).json({ success: false, error });
       }
 
-      if (!error) {
-        await query(QueryString.InsertImage(), [
-          product_uid,
-          image.path,
-          ImageIndex === 0,
-          ImageIndex,
-        ]);
+      await query(QueryString.InsertImage(), [
+        product_uid,
+        image.path,
+        ImageIndex === 0,
+        ImageIndex,
+      ]);
 
-        return res.status(200).json({ success: true });
-      }
+      return res.status(200).json({ success: true });
+
     } catch (error) {
       console.log(`upload route error ==>`, { error });
       return res.status(500).json({ success: false, error });

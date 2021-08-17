@@ -55,3 +55,9 @@ async function getClient() {
 }
 
 export { query, getClient };
+
+// **** TRANSACTION ISOLATION LEVEL ****
+// const pg = require('pg')
+// const DBClient = await new pg.Pool(<config>).connect()
+// await DBClient.query('BEGIN')
+// await DBClient.query('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ')

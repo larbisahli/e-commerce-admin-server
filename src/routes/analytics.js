@@ -19,7 +19,7 @@ let router = Router();
 // Route for '/api/analytics/share'
 router.route('/share').post(async (req, res) => {
   // code to track users shared platforms
-  const { platform, submission_uid, client_uid, category } = req.body;
+  const { platform, submission_uid, client_uid } = req.body;
 
   const ClientUid = req.cookies['pl_gp_uid'] ?? client_uid;
 
@@ -29,18 +29,6 @@ router.route('/share').post(async (req, res) => {
     return res.send(
       "<div><h1>Forbidden</h1><div>You don't have permission to access this resource</div></div>"
     );
-  }
-
-  if (!submission_uid || !platform) {
-    res.status(403).json({ error: 'Not enough arguments.', success: false });
-  }
-
-  try {
-    await query(QueryString.UpdateShareOn(), [platform, submission_uid]);
-    return res.status(201).json({ success: true });
-  } catch (err) {
-    console.log('email err :>> ', err);
-    return res.status(500).json({ message: err.detail, success: false });
   }
 });
 

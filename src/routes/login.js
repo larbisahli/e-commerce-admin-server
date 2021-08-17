@@ -96,12 +96,13 @@ router
               );
               res.status(200).json({
                 success: true,
+                userInfo: { first_name, last_name }
               });
             });
           } else {
             res
               .status(403)
-              .json({ message: 'Password incorrect', success: false });
+              .json({ message: 'Incorrect Password', success: false });
           }
         });
       } else if (!results) {

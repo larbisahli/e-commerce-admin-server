@@ -50,9 +50,13 @@ const RootQuery = new GraphQLObjectType({
         product_uid: { type: GraphQLID },
       },
       async resolve(parent, { product_uid }) {
-        const { rows } = await query(QueryString.Product(), [product_uid]);
+        const product = await query(QueryString.Product(), [product_uid]);
 
-        return rows[0];
+        if (product?.rowCount === 0) {
+          throw new Error(`Product not found!, product_uid: ${product_uid}`)
+        }
+
+        return product?.rows[0];
       },
     },
     Products: {
@@ -65,14 +69,12 @@ const RootQuery = new GraphQLObjectType({
       },
       async resolve(parent, { account_uid, category_uid, page, limit }) {
         const offset = page === 0 ? 0 : (page - 1) * limit;
-
         const { rows } = await query(QueryString.Products(), [
           category_uid,
           account_uid,
           limit,
           offset,
         ]);
-
         return rows;
       },
     },
@@ -91,7 +93,6 @@ const RootQuery = new GraphQLObjectType({
       },
       async resolve(parent, { attribute_uid }) {
         const { rows } = await query(QueryString.Attribute(), [attribute_uid]);
-
         return rows[0];
       },
     },
@@ -102,7 +103,6 @@ const RootQuery = new GraphQLObjectType({
       },
       async resolve(parent, { product_uid }) {
         const { rows } = await query(QueryString.Attributes(), [product_uid]);
-
         return rows;
       },
     },
@@ -199,8 +199,6 @@ const Mutation = new GraphQLObjectType({
           is_new,
           note,
         ]);
-
-        console.log(`rows`, rows);
         return rows[0];
       },
     },
@@ -251,7 +249,6 @@ const Mutation = new GraphQLObjectType({
           is_new,
           note,
         ]);
-
         return rows[0];
       },
     },
@@ -264,8 +261,8 @@ const Mutation = new GraphQLObjectType({
       },
       async resolve(parent, { product_uid, attribute_name, options }) {
         const client = await getClient();
-        // **** TRANSACTION ****
 
+        // **** TRANSACTION ****
         try {
           await client.query('BEGIN');
 
@@ -273,9 +270,7 @@ const Mutation = new GraphQLObjectType({
             product_uid,
             attribute_name,
           ]);
-
           // options
-
           const { attribute_uid } = rows[0];
 
           if (!attribute_uid) {
@@ -299,8 +294,8 @@ const Mutation = new GraphQLObjectType({
           }
 
           await client.query('COMMIT');
-
           return rows[0];
+
         } catch (err) {
           await client.query('ROLLBACK');
           console.log(`CreateAttribute :>`, { err, message: err.message });
@@ -316,14 +311,10 @@ const Mutation = new GraphQLObjectType({
         attribute_name: { type: GraphQLString },
       },
       async resolve(parent, { attribute_uid, attribute_name }) {
-        console.log({ attribute_uid, attribute_name })
         const { rows } = await query(QueryString.UpdateAttribute(), [
           attribute_uid,
           attribute_name,
         ]);
-
-        console.log(rows)
-
         return rows[0];
       },
     },
@@ -333,13 +324,9 @@ const Mutation = new GraphQLObjectType({
         attribute_uid: { type: GraphQLID },
       },
       async resolve(parent, { attribute_uid }) {
-        console.log({ attribute_uid })
         const { rows } = await query(QueryString.DeleteAttribute(), [
           attribute_uid,
         ]);
-
-        console.log(rows)
-
         return rows[0];
       },
     },
@@ -355,16 +342,12 @@ const Mutation = new GraphQLObjectType({
         parent,
         { attribute_uid, option_name, additional_price, color_hex }
       ) {
-        console.log({ attribute_uid, option_name, additional_price, color_hex })
         const { rows } = await query(QueryString.InsertOption(), [
           attribute_uid,
           option_name,
           additional_price,
           color_hex,
         ]);
-
-        console.log(rows)
-
         return rows[0];
       },
     },
@@ -386,7 +369,6 @@ const Mutation = new GraphQLObjectType({
           additional_price,
           color_hex,
         ]);
-
         return rows[0];
       },
     },
