@@ -101,7 +101,11 @@ const InsertAttribute = () => {
 };
 
 const UpdateAttribute = () => {
-  return `UPDATE attributes SET attribute_name = $2 WHERE attribute_uid = $1 RETURNING attribute_uid`;
+  return `UPDATE attributes SET attribute_name = $2 WHERE attribute_uid = $1 RETURNING attribute_name`;
+};
+
+const DeleteAttribute = () => {
+  return `DELETE FROM attributes WHERE attribute_uid = $1 RETURNING attribute_name`;
 };
 
 // **** (options) Table Queries ****
@@ -111,7 +115,7 @@ const InsertOption = () => {
 };
 
 const UpdateOption = () => {
-  return `UPDATE options SET option_name = $2, additional_price = $3, color_hex = $4 WHERE option_uid = $1 RETURNING option_uid`;
+  return `UPDATE options SET option_name = $2, additional_price = $3, color_hex = $4 WHERE option_uid = $1 RETURNING option_name`;
 };
 
 const DeleteOption = () => {
@@ -138,4 +142,5 @@ module.exports = {
   InsertOption,
   UpdateOption,
   DeleteOption,
+  DeleteAttribute
 };

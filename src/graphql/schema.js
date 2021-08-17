@@ -292,7 +292,6 @@ const Mutation = new GraphQLObjectType({
             ]);
 
             const option_uid = Op.rows[0].option_uid;
-            console.log(`Op =>`, Op, option_uid);
             if (!option_uid) {
               await client.query('ROLLBACK');
               throw new Error("Couldn't insert option");
@@ -317,10 +316,29 @@ const Mutation = new GraphQLObjectType({
         attribute_name: { type: GraphQLString },
       },
       async resolve(parent, { attribute_uid, attribute_name }) {
+        console.log({ attribute_uid, attribute_name })
         const { rows } = await query(QueryString.UpdateAttribute(), [
           attribute_uid,
           attribute_name,
         ]);
+
+        console.log(rows)
+
+        return rows[0];
+      },
+    },
+    DeleteAttribute: {
+      type: AttributeType,
+      args: {
+        attribute_uid: { type: GraphQLID },
+      },
+      async resolve(parent, { attribute_uid }) {
+        console.log({ attribute_uid })
+        const { rows } = await query(QueryString.DeleteAttribute(), [
+          attribute_uid,
+        ]);
+
+        console.log(rows)
 
         return rows[0];
       },
@@ -330,19 +348,22 @@ const Mutation = new GraphQLObjectType({
       args: {
         attribute_uid: { type: GraphQLID },
         option_name: { type: GraphQLString },
-        additional_price: { type: GraphQLInt },
+        additional_price: { type: GraphQLFloat },
         color_hex: { type: GraphQLString },
       },
       async resolve(
         parent,
         { attribute_uid, option_name, additional_price, color_hex }
       ) {
+        console.log({ attribute_uid, option_name, additional_price, color_hex })
         const { rows } = await query(QueryString.InsertOption(), [
           attribute_uid,
           option_name,
           additional_price,
           color_hex,
         ]);
+
+        console.log(rows)
 
         return rows[0];
       },
@@ -352,7 +373,7 @@ const Mutation = new GraphQLObjectType({
       args: {
         option_uid: { type: GraphQLID },
         option_name: { type: GraphQLString },
-        additional_price: { type: GraphQLInt },
+        additional_price: { type: GraphQLFloat },
         color_hex: { type: GraphQLString },
       },
       async resolve(
@@ -376,7 +397,6 @@ const Mutation = new GraphQLObjectType({
       },
       async resolve(parent, { option_uid }) {
         const { rows } = await query(QueryString.DeleteOption(), [option_uid]);
-
         return rows[0];
       },
     },
