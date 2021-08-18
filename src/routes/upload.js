@@ -71,6 +71,10 @@ router
   .post(async (req, res) => {
     const { image: url, index, product_uid } = req.body;
 
+    if (!url || !index || !product_uid) {
+      return res.status(403).json({ success: false, error: 'Require Fields!' });
+    }
+
     const ImageIndex = Number(index);
 
     if (!product_uid) {
