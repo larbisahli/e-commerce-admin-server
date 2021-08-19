@@ -111,7 +111,7 @@ const DeleteAttribute = () => {
 // **** (options) Table Queries ****
 
 const InsertOption = () => {
-  return `INSERT INTO options(attribute_uid, option_name, additional_price, color_hex) VALUES($1, $2, $3, $4) RETURNING option_uid`;
+  return `INSERT INTO options(attribute_uid, option_name, additional_price, color_hex) VALUES($1, $2, $3, $4) RETURNING option_uid, option_name`;
 };
 
 const UpdateOption = () => {

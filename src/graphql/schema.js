@@ -270,8 +270,9 @@ const Mutation = new GraphQLObjectType({
             product_uid,
             attribute_name,
           ]);
-          // options
           const { attribute_uid } = rows[0];
+
+          // options
 
           if (!attribute_uid) {
             await client.query('ROLLBACK');
