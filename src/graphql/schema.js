@@ -53,7 +53,7 @@ const RootQuery = new GraphQLObjectType({
         const product = await query(QueryString.Product(), [product_uid]);
 
         if (product?.rowCount === 0) {
-          throw new Error(`Product not found!, product_uid: ${product_uid}`)
+          throw new Error(`Product not found!, product_uid: ${product_uid}`);
         }
 
         return product?.rows[0];
@@ -296,7 +296,6 @@ const Mutation = new GraphQLObjectType({
 
           await client.query('COMMIT');
           return rows[0];
-
         } catch (err) {
           await client.query('ROLLBACK');
           console.log(`CreateAttribute :>`, { err, message: err.message });

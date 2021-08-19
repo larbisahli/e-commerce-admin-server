@@ -142,5 +142,5 @@ module.exports = {
   InsertOption,
   UpdateOption,
   DeleteOption,
-  DeleteAttribute
+  DeleteAttribute,
 };

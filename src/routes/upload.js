@@ -88,12 +88,10 @@ router
         ]);
 
         if (thumbnail[0]?.thumbnail) {
-          return res
-            .status(401)
-            .json({
-              success: false,
-              error: { message: 'Product thumbnail already exist!' },
-            });
+          return res.status(401).json({
+            success: false,
+            error: { message: 'Product thumbnail already exist!' },
+          });
         }
       }
 
@@ -103,12 +101,10 @@ router
       );
 
       if (!product[0]?.title) {
-        return res
-          .status(500)
-          .json({
-            success: false,
-            error: { message: 'Product title does not exist!' },
-          });
+        return res.status(500).json({
+          success: false,
+          error: { message: 'Product title does not exist!' },
+        });
       }
 
       const { image, error } = await UploadImageByUrl(url, product[0]?.title);
@@ -125,7 +121,6 @@ router
       ]);
 
       return res.status(200).json({ success: true });
-
     } catch (error) {
       console.log(`upload route error ==>`, { error });
       return res.status(500).json({ success: false, error });

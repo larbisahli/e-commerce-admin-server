@@ -96,7 +96,7 @@ router
               );
               res.status(200).json({
                 success: true,
-                userInfo: { first_name, last_name }
+                userInfo: { first_name, last_name },
               });
             });
           } else {
