@@ -17,7 +17,7 @@ async function Authorization(req, res, next) {
     const IpAddress =
       req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
-    console.log(`IpAddress`, { IpAddress })
+    console.log(`IpAddress`, { IpAddress });
 
     if (!bearerHeader) {
       // Show IP address
@@ -73,9 +73,9 @@ router
   .route('/')
   .all(Authorization)
   .post(async (req, res) => {
-    const { image: url, index, product_uid } = req.body;
+    const { image: url, index, title, product_uid } = req.body;
 
-    console.log(`(1)`, { index, product_uid });
+    console.log(`(1)`, { index, product_uid, title });
 
     if (!url || !index || !product_uid) {
       return res.status(403).json({ success: false, error: 'Require Fields!' });
@@ -105,19 +105,14 @@ router
         }
       }
 
-      const { rows: product } = await query(
-        `SELECT title from products WHERE product_uid = $1`,
-        [product_uid]
-      );
-
-      if (!product[0]?.title) {
+      if (title) {
         return res.status(500).json({
           success: false,
           error: { message: 'Product title does not exist!' },
         });
       }
 
-      const { image, error } = await UploadImageByUrl(url, product[0]?.title);
+      const { image, error } = await UploadImageByUrl(url, title);
 
       console.log(`(4)`, { error });
 

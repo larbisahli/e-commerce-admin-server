@@ -38,13 +38,13 @@ const speedLimiter = new slowDown({
   delayMs: 100, // begin adding 100ms of delay per request above 10
 });
 
+app.use(formData.parse());
+
 app.use(express.json({ limit: '16mb', extended: true }));
 
 app.use(express.urlencoded({ limit: '16mb', extended: true }));
 
 app.use(cookieParser());
-
-app.use(formData.parse());
 
 app.use(helmet());
 
