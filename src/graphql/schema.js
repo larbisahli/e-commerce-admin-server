@@ -69,13 +69,23 @@ const RootQuery = new GraphQLObjectType({
       },
       async resolve(parent, { account_uid, category_uid, page, limit }) {
         const offset = page === 0 ? 0 : (page - 1) * limit;
-        const { rows } = await query(QueryString.Products(), [
-          category_uid,
-          account_uid,
-          limit,
-          offset,
-        ]);
-        return rows;
+
+        if (category_uid) {
+          const { rows } = await query(QueryString.Products(), [
+            category_uid,
+            account_uid,
+            limit,
+            offset,
+          ]);
+          return rows;
+        } else {
+          const { rows } = await query(QueryString.ProductsByAccount(), [
+            account_uid,
+            limit,
+            offset,
+          ]);
+          return rows;
+        }
       },
     },
     ProductsCount: {

@@ -88,7 +88,7 @@ router
                 cookie.serialize('DGALA-TOKEN', token, {
                   httpOnly: true,
                   secure: true,
-                  maxAge: remember_me ? 7 * 86400 : 86400,
+                  maxAge: remember_me ? 30 * 86400 : 86400,
                   sameSite: 'Strict',
                   path: '/',
                   domain: DEV_NODE_ENV ? '127.0.0.1' : 'dropgala.com',

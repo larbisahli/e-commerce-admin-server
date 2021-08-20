@@ -33,6 +33,13 @@ const Products = () => {
     WHERE pd.category_uid = $1 AND pd.account_uid = $2 LIMIT $3 OFFSET $4`;
 };
 
+const ProductsByAccount = () => {
+  return `SELECT pd.product_uid, pd.category_uid, pd.account_uid, pd.title, pd.price, pd.discount, pd.inventory,
+    ARRAY(SELECT json_build_object('image', img.image_path, 'image_uid', img.image_uid) 
+    FROM images img WHERE img.product_uid = pd.product_uid AND img.thumbnail = true) AS thumbnail FROM products pd
+    WHERE pd.account_uid = $1 LIMIT $2 OFFSET $3`;
+};
+
 const Product = () => {
   return `SELECT pd.product_uid, pd.category_uid, pd.account_uid, 
     pd.title, pd.price, pd.discount, pd.warehouse_location, 
@@ -143,4 +150,5 @@ module.exports = {
   UpdateOption,
   DeleteOption,
   DeleteAttribute,
+  ProductsByAccount
 };
