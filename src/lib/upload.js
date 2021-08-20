@@ -187,5 +187,7 @@ export default async function UploadImageByUrl(url, title) {
           ETag: placeholder.ETag,
         },
       };
-    });
+    }).catch((error) => {
+      return { error }
+    })
 }
