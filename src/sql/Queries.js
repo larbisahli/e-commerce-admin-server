@@ -150,5 +150,5 @@ module.exports = {
   UpdateOption,
   DeleteOption,
   DeleteAttribute,
-  ProductsByAccount
+  ProductsByAccount,
 };

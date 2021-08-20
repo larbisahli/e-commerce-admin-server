@@ -59,7 +59,7 @@ async function Authorization(req, res, next) {
     }
   } catch (err) {
     console.log('err :>> ', err);
-    return next(err)
+    return next(err);
   }
   return next();
 }
