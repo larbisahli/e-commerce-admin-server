@@ -17,6 +17,8 @@ async function Authorization(req, res, next) {
     const IpAddress =
       req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
+    console.log(`IpAddress`, { IpAddress })
+
     if (!bearerHeader) {
       // Show IP address
       console.log(`Error: No credentials sent!, ip:${IpAddress}`);
@@ -59,7 +61,9 @@ async function Authorization(req, res, next) {
     }
   } catch (err) {
     console.log('err :>> ', err);
-    return next(err);
+    return res
+      .status(403)
+      .send({ error: { message: 'Unauthorized access', err } });
   }
   return next();
 }
@@ -71,7 +75,7 @@ router
   .post(async (req, res) => {
     const { image: url, index, product_uid } = req.body;
 
-    console.log(`(1)`, { index, product_uid })
+    console.log(`(1)`, { index, product_uid });
 
     if (!url || !index || !product_uid) {
       return res.status(403).json({ success: false, error: 'Require Fields!' });
@@ -83,7 +87,7 @@ router
       return res.status(403).json({ success: false, error: 'Unknown error' });
     }
 
-    console.log(`(2)`, { index, product_uid })
+    console.log(`(2)`, { index, product_uid });
 
     try {
       if (ImageIndex === 0) {
@@ -91,7 +95,7 @@ router
           product_uid,
         ]);
 
-        console.log(`(3)`, { thumbnail })
+        console.log(`(3)`, { thumbnail });
 
         if (thumbnail[0]?.thumbnail) {
           return res.status(401).json({
@@ -115,7 +119,7 @@ router
 
       const { image, error } = await UploadImageByUrl(url, product[0]?.title);
 
-      console.log(`(4)`, { error })
+      console.log(`(4)`, { error });
 
       if (error) {
         return res.status(500).json({ success: false, error });
