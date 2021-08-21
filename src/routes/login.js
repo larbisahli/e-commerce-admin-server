@@ -56,7 +56,7 @@ router
           email,
           password_hash,
           privileges,
-          profile_img
+          profile_img,
         } = results;
         /* Check and compare password */
         bcrypt.compare(password, password_hash).then((isMatch) => {
