@@ -69,9 +69,9 @@ router
   .route('/')
   .all(Authorization)
   .post(async (req, res) => {
-    const { image: url, index, title, product_uid } = req.body;
+    const { image, index, product_uid } = req.body;
 
-    if (!url || !index || !product_uid) {
+    if (!image || !index || !product_uid) {
       return res.status(403).json({ success: false, error: 'Require Fields!' });
     }
 
@@ -95,14 +95,19 @@ router
         }
       }
 
-      if (title) {
-        return res.status(500).json({
+      const { rows: product } = await query(
+        `SELECT title from products WHERE product_uid = $1`,
+        [product_uid]
+      );
+
+      if (!product[0]?.title) {
+        return res.status(400).json({
           success: false,
           error: { message: 'Product title does not exist!' },
         });
       }
 
-      const { image, error } = await UploadImageByUrl(url, title);
+      const { image, error } = await UploadImageByUrl(image, product[0]?.title);
 
       if (error) {
         return res.status(500).json({ success: false, error });
@@ -125,7 +130,7 @@ router
     const { image_uid } = req.body;
 
     if (!image_uid)
-      return res.status(403).json({ success: false, error: 'Unknown error' });
+      return res.status(403).json({ success: false, error: 'Require Fields!' });
 
     try {
       deleteObject(image_uid, async (error) => {

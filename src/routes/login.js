@@ -46,17 +46,17 @@ router
 
       const results = rows[0];
 
-      console.log(`results`, results);
-
       if (results && results.is_active) {
         /* Define variables */
         const {
           account_uid,
           first_name,
           last_name,
+          username,
           email,
           password_hash,
           privileges,
+          profile_img
         } = results;
         /* Check and compare password */
         bcrypt.compare(password, password_hash).then((isMatch) => {
@@ -67,12 +67,14 @@ router
               account_uid,
               first_name,
               last_name,
+              username,
+              profile_img,
               email,
               privileges,
             };
             // Sign Options
             const SignOptions = {
-              expiresIn: remember_me ? '7d' : '1d',
+              expiresIn: remember_me ? '30d' : '1d',
               algorithm: 'RS256',
             };
             /* Sign token */
