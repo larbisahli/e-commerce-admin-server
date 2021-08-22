@@ -44,9 +44,9 @@ const Product = () => {
   return `SELECT pd.product_uid, pd.category_uid, pd.account_uid, 
     pd.title, pd.price, pd.discount, pd.warehouse_location, 
     pd.product_description, pd.short_description, pd.inventory, pd.product_weight, pd.is_new, pd.note, 
-    ARRAY(SELECT json_build_object('image', img.image_path, 'image_uid', img.image_uid) 
+    ARRAY(SELECT json_build_object('image', img.image_path, 'image_uid', img.image_uid, 'display_order', img.display_order) 
     FROM images img WHERE img.product_uid = $1 AND img.thumbnail = true) AS thumbnail,
-    ARRAY(SELECT json_build_object('image', img.image_path, 'image_uid', img.image_uid) 
+    ARRAY(SELECT json_build_object('image', img.image_path, 'image_uid', img.image_uid, 'display_order', img.display_order) 
     FROM images img WHERE img.product_uid = $1 AND img.thumbnail = false ORDER BY img.display_order) AS gallery
     FROM products pd WHERE pd.product_uid = $1`;
 };
@@ -88,6 +88,10 @@ const DeleteImage = () => {
 
 const CheckThumbnail = () => {
   return `SELECT thumbnail from images WHERE product_uid = $1 AND thumbnail = true`;
+};
+
+const UpdateImageOrder = () => {
+  return `UPDATE images SET display_order = $2 WHERE image_uid = $1 RETURNING display_order`;
 };
 
 // **** (attributes) Table Queries ****
@@ -151,4 +155,5 @@ module.exports = {
   DeleteOption,
   DeleteAttribute,
   ProductsByAccount,
+  UpdateImageOrder,
 };

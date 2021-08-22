@@ -72,11 +72,12 @@ export const ProductType = new GraphQLObjectType({
   }),
 });
 
-const IMGType = new GraphQLObjectType({
+export const IMGType = new GraphQLObjectType({
   name: 'IMG',
   fields: () => ({
     image_uid: { type: GraphQLID },
     image: { type: GraphQLString },
+    display_order: { type: GraphQLInt },
   }),
 });
 

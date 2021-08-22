@@ -17,6 +17,7 @@ import {
   AttributeType,
   OptionType,
   OptionInputType,
+  IMGType,
 } from './queries';
 
 // const ENV = process.env;
@@ -389,6 +390,20 @@ const Mutation = new GraphQLObjectType({
       },
       async resolve(parent, { option_uid }) {
         const { rows } = await query(QueryString.DeleteOption(), [option_uid]);
+        return rows[0];
+      },
+    },
+    UpdateImageOrder: {
+      type: IMGType,
+      args: {
+        image_uid: { type: GraphQLID },
+        display_order: { type: GraphQLInt },
+      },
+      async resolve(parent, { image_uid, display_order }) {
+        const { rows } = await query(QueryString.UpdateImageOrder(), [
+          image_uid,
+          display_order,
+        ]);
         return rows[0];
       },
     },
