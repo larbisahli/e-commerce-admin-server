@@ -69,9 +69,9 @@ router
   .route('/')
   .all(Authorization)
   .post(async (req, res) => {
-    const { image, index, product_uid } = req.body;
+    const { image: url, index, product_uid } = req.body;
 
-    if (!image || !index || !product_uid) {
+    if (!url || !index || !product_uid) {
       return res.status(403).json({ success: false, error: 'Require Fields!' });
     }
 
@@ -107,7 +107,7 @@ router
         });
       }
 
-      const { image, error } = await UploadImageByUrl(image, product[0]?.title);
+      const { image, error } = await UploadImageByUrl(url, product[0]?.title);
 
       if (error) {
         return res.status(500).json({ success: false, error });
