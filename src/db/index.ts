@@ -1,21 +1,21 @@
-/* eslint-disable no-undef */
-import { Pool } from 'pg';
+import { Pool, QueryResult, PoolClient } from 'pg';
+import dotenv from 'dotenv';
 
-require('dotenv').config();
+dotenv.config();
 
 const ENV = process.env;
 const PROD_NODE_ENV = ENV.NODE_ENV === 'production';
 
 const pool = new Pool({
   host: PROD_NODE_ENV ? ENV.POSTGRES_HOST_PROD : ENV.POSTGRES_HOST_DEV,
-  port: ENV.POSTGRES_PORT,
+  port: Number(ENV.POSTGRES_PORT),
   user: PROD_NODE_ENV ? ENV.POSTGRES_USER : ENV.POSTGRES_DEV_USER,
   password: PROD_NODE_ENV ? ENV.POSTGRES_PASSWORD : ENV.POSTGRES_DEV_PASSWORD,
   database: PROD_NODE_ENV ? ENV.POSTGRES_DB : ENV.POSTGRES_DEV_DB,
   max: 20,
 });
 
-async function query(text, params) {
+async function query(text: string, params:unknown[]):Promise<QueryResult<unknown>> {
   try {
     return await pool.query(text, params);
   } catch (error) {
@@ -23,7 +23,13 @@ async function query(text, params) {
   }
 }
 
-async function getClient() {
+declare module 'pg' {
+  export interface PoolClient {
+    lastQuery?: unknown[]
+  }
+}
+
+async function getClient(): Promise<PoolClient> {
   try {
     const client = await pool.connect();
     const query = client.query;
@@ -35,8 +41,9 @@ async function getClient() {
         `The last executed query on this client was: ${client.lastQuery}`
       );
     }, 5000);
+    
     // monkey patch the query method to keep track of the last query executed
-    client.query = (...args) => {
+    client.query = (...args:unknown[]) => {
       client.lastQuery = args;
       return query.apply(client, args);
     };
@@ -50,7 +57,7 @@ async function getClient() {
     };
     return client;
   } catch (err) {
-    console.log('object :>> ', err);
+    console.log('getClient() :>> ', err);
   }
 }
 

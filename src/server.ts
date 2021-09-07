@@ -11,8 +11,9 @@ import RedisStore from 'rate-limit-redis';
 import helmet from 'helmet';
 import formData from 'express-form-data';
 import Authorization from './middleware/Authorization';
+import dotenv from 'dotenv';
 
-require('dotenv').config();
+dotenv.config();
 
 const app = express();
 
@@ -65,7 +66,7 @@ app.use(
     context: {
       res,
       cookies: req.cookies,
-      userId: req.userId,
+      account_uid: req.account_uid,
       privileges: req.privileges,
       redis: {
         ...client,

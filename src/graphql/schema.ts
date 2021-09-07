@@ -1,5 +1,5 @@
 import { query, getClient } from '../db';
-import QueryString from '../sql/Queries';
+import * as QueryString from '../sql/Queries';
 import {
   GraphQLObjectType,
   GraphQLInt,
@@ -41,7 +41,7 @@ const RootQuery = new GraphQLObjectType({
       args: {},
       async resolve() {
         // **** Use pagination when it grows ****
-        const { rows } = await query(QueryString.Categories());
+        const { rows } = await query(QueryString.Categories(), []);
         return rows;
       },
     },
@@ -93,7 +93,7 @@ const RootQuery = new GraphQLObjectType({
       type: ProductsCountType,
       args: {},
       async resolve() {
-        const { rows } = await query(QueryString.ProductCount());
+        const { rows } = await query(QueryString.ProductCount(), []);
         return rows[0];
       },
     },

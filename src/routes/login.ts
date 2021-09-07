@@ -5,14 +5,16 @@ import { query } from '../db';
 import cookie from 'cookie';
 import fs from 'fs';
 import path from 'path';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const ENV = process.env;
 const DEV_NODE_ENV = ENV.NODE_ENV !== 'production';
 
-let router = Router();
-require('dotenv').config();
+const router = Router();
 
-let PrivateKEY = null;
+let PrivateKEY:string;
 
 if (process.env.NODE_ENV === 'production') {
   const jwtRS256File = path.join(process.cwd(), 'jwtRS256.key');
@@ -75,7 +77,7 @@ router
             // Sign Options
             const SignOptions = {
               expiresIn: remember_me ? '30d' : '1d',
-              algorithm: 'RS256',
+              algorithms: ['RS256']
             };
             /* Sign token */
             jwt.sign(payload, PrivateKEY, SignOptions, (err, token) => {
@@ -91,7 +93,7 @@ router
                   httpOnly: true,
                   secure: true,
                   maxAge: remember_me ? 30 * 86400 : 86400,
-                  sameSite: 'Strict',
+                  sameSite: 'strict',
                   path: '/',
                   domain: DEV_NODE_ENV ? '127.0.0.1' : 'dropgala.com',
                 })
@@ -127,4 +129,4 @@ router
     }
   });
 
-module.exports = router;
+export default router;

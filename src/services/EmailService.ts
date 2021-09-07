@@ -3,7 +3,12 @@ import sgMail from '@sendgrid/mail';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-export const sendConfirmationEmail = async ({ email, url }) => {
+interface EmailType {
+  email: string;
+  url: string;
+}
+
+export const sendConfirmationEmail: ({ email, url }: EmailType) => Promise<void> = async ({ email, url }) => {
   await sgMail
     .send({
       to: email,
@@ -15,7 +20,7 @@ export const sendConfirmationEmail = async ({ email, url }) => {
     .then(() => {
       console.log('Email sent');
     })
-    .catch((error) => {
+    .catch((error:Error) => {
       console.error(error);
     });
 };

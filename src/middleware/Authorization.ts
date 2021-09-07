@@ -1,12 +1,33 @@
-import jwt from 'jsonwebtoken';
+import * as jwt from 'jsonwebtoken';
 import PublicKEY from '../lib/jwtPublicKey';
 import { query } from '../db';
 import cookie from 'cookie';
+import type {ExpressMiddleware} from '../interfaces'
+import { Response } from 'express';
 
 const ENV = process.env;
 const DEV_NODE_ENV = ENV.NODE_ENV !== 'production';
 
-const Clear_DGALA_Cookie = (res, DGALA_TOKEN) => {
+declare module 'jsonwebtoken' {
+  export interface UserType extends jwt.JwtPayload {
+    account_uid: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    username: string;
+    profile_img: string;
+    privileges: string[];
+  }
+}
+
+declare module 'express' {
+  export interface Request {
+    account_uid?: string
+    privileges?: string[]
+  }
+}
+
+const Clear_DGALA_Cookie = (res:Response, DGALA_TOKEN:string) => {
   if (DGALA_TOKEN) {
     res.setHeader(
       'set-Cookie',
@@ -14,7 +35,7 @@ const Clear_DGALA_Cookie = (res, DGALA_TOKEN) => {
         httpOnly: true,
         secure: true,
         maxAge: 0,
-        sameSite: 'Strict',
+        sameSite: 'strict',
         path: '/',
         domain: DEV_NODE_ENV ? '127.0.0.1' : 'dropgala.com',
       })
@@ -23,7 +44,7 @@ const Clear_DGALA_Cookie = (res, DGALA_TOKEN) => {
   return;
 };
 
-export default async function Authorization(req, res, next) {
+const Authorization:ExpressMiddleware = async(req, res, next)=> {
   // Token Validation
   let results = null;
   const bearerHeader = req.headers?.authorization;
@@ -49,8 +70,8 @@ export default async function Authorization(req, res, next) {
     const bearerToken = bearer[1];
     const jwtUserToken = bearerToken;
 
-    const UserInfo = jwt.verify(jwtUserToken, PublicKEY, {
-      algorithm: ['RS256'],
+    const UserInfo = <jwt.UserType>jwt.verify(jwtUserToken, PublicKEY, {
+      algorithms: ['RS256'],
     });
 
     const account_uid = UserInfo?.account_uid;
@@ -69,7 +90,7 @@ export default async function Authorization(req, res, next) {
     }
 
     if (results && results?.is_active) {
-      req.userId = results.account_uid;
+      req.account_uid = results.account_uid;
       req.privileges = results.privileges;
     } else if (!results) {
       console.log(`Error: User ${account_uid} not found. ip:${IpAddress}`);
@@ -88,3 +109,5 @@ export default async function Authorization(req, res, next) {
   }
   return next();
 }
+
+export default Authorization

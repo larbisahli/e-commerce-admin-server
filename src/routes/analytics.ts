@@ -1,12 +1,12 @@
 /* eslint-disable no-undef */
 import { Router } from 'express';
-import { query } from '../db';
-import QueryString from '../sql/Queries';
-import redis from 'redis';
-import { promisify } from 'util';
+// import { query } from '../db';
+// import QueryString from '../sql/Queries';
+// import redis from 'redis';
+// import { promisify } from 'util';
 
-const ENV = process.env;
-const PROD_NODE_ENV = ENV.NODE_ENV === 'production';
+// const ENV = process.env;
+// const PROD_NODE_ENV = ENV.NODE_ENV === 'production';
 
 // const client = redis.createClient({
 //   host: PROD_NODE_ENV ? 'redis' : '127.0.0.1',
@@ -14,7 +14,7 @@ const PROD_NODE_ENV = ENV.NODE_ENV === 'production';
 //   password: process.env.REDIS_PASSWORD,
 // });
 
-let router = Router();
+const router = Router();
 
 // Route for '/api/analytics/share'
 router.route('/share').post(async (req, res) => {
@@ -32,4 +32,4 @@ router.route('/share').post(async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
