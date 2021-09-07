@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Application, Request } from 'express';
 import cors from 'cors';
 import mountRoutes from './routes';
 import cookieParser from 'cookie-parser';
@@ -12,10 +12,14 @@ import helmet from 'helmet';
 import formData from 'express-form-data';
 import Authorization from './middleware/Authorization';
 import dotenv from 'dotenv';
+import debug from 'debug';
+
+const Debug = debug('http');
 
 dotenv.config();
+Debug('booting %o', 'Express server');
 
-const app = express();
+const app: Application = express();
 
 app.set('trust proxy', true);
 
@@ -28,7 +32,7 @@ const client = redis.createClient({
   password: process.env.REDIS_PASSWORD,
 });
 
-const speedLimiter = new slowDown({
+const speedLimiter = slowDown({
   store: new RedisStore({
     client,
   }),
@@ -39,7 +43,7 @@ const speedLimiter = new slowDown({
 
 app.use(formData.parse());
 
-app.use(express.json({ limit: '16mb', extended: true }));
+app.use(express.json({ limit: '16mb' }));
 
 app.use(express.urlencoded({ limit: '16mb', extended: true }));
 
@@ -58,16 +62,21 @@ app.use(
   })
 );
 
+interface GraphRequest extends Request {
+  cookies: unknown;
+  account_uid: string;
+  privileges: string[];
+}
+
 app.use(
   '/graphql',
   Authorization,
-  graphqlHTTP((req, res) => ({
+  graphqlHTTP((request: GraphRequest) => ({
     schema,
     context: {
-      res,
-      cookies: req.cookies,
-      account_uid: req.account_uid,
-      privileges: req.privileges,
+      cookies: request.cookies,
+      account_uid: request.account_uid,
+      privileges: request.privileges,
       redis: {
         ...client,
         setExAsync: promisify(client.setex).bind(client),
@@ -75,7 +84,8 @@ app.use(
         getAsync: promisify(client.get).bind(client),
         delAsync: promisify(client.del).bind(client),
       },
-      ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+      ip:
+        request.headers['x-forwarded-for'] || request.connection.remoteAddress,
     },
     graphiql: DEV_NODE_ENV,
   }))
@@ -85,7 +95,6 @@ mountRoutes(app);
 
 const PORT = 5001;
 
-app.listen(PORT, (error) => {
-  if (error) return console.log('Express Server ERROR:>> ', error);
-  console.log(`Express Server started on port ${PORT}`);
+app.listen(PORT, function () {
+  Debug(`Express Server started on port ${PORT}`);
 });

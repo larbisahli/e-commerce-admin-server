@@ -15,10 +15,10 @@ const pool = new Pool({
   max: 20,
 });
 
-async function query(
+async function query<Type>(
   text: string,
   params: unknown[]
-): Promise<QueryResult<unknown>> {
+): Promise<QueryResult<Type>> {
   try {
     return await pool.query(text, params);
   } catch (error) {

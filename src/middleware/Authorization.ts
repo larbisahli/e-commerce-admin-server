@@ -27,6 +27,12 @@ declare module 'express' {
   }
 }
 
+interface AccountType {
+  account_uid: string;
+  is_active: boolean;
+  privileges: string[];
+}
+
 const Clear_DGALA_Cookie = (res: Response, DGALA_TOKEN: string) => {
   if (DGALA_TOKEN) {
     res.setHeader(
@@ -46,7 +52,8 @@ const Clear_DGALA_Cookie = (res: Response, DGALA_TOKEN: string) => {
 
 const Authorization: ExpressMiddleware = async (req, res, next) => {
   // Token Validation
-  let results = null;
+
+  let results: AccountType;
   const bearerHeader = req.headers?.authorization;
   const IpAddress =
     req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -77,8 +84,8 @@ const Authorization: ExpressMiddleware = async (req, res, next) => {
     const account_uid = UserInfo?.account_uid;
 
     if (account_uid) {
-      const { rows } = await query(
-        'SELECT * FROM accounts WHERE account_uid = $1',
+      const { rows } = await query<AccountType>(
+        'SELECT account_uid, is_active, privileges FROM accounts WHERE account_uid = $1',
         [account_uid]
       );
       results = rows[0];
