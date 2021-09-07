@@ -12,7 +12,10 @@ const s3 = new AWS.S3({
   secretAccessKey: process.env.SPACES_ACCESS_SECRET_KEY,
 });
 
-export const deleteObject: (path: any, callback: any) => void = (path, callback) => {
+export const deleteObject: (path: any, callback: any) => void = (
+  path,
+  callback
+) => {
   s3.deleteObject(
     {
       Bucket: process.env.SPACES_BUCKET_NAME,

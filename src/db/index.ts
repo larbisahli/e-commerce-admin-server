@@ -15,7 +15,10 @@ const pool = new Pool({
   max: 20,
 });
 
-async function query(text: string, params:unknown[]):Promise<QueryResult<unknown>> {
+async function query(
+  text: string,
+  params: unknown[]
+): Promise<QueryResult<unknown>> {
   try {
     return await pool.query(text, params);
   } catch (error) {
@@ -25,7 +28,7 @@ async function query(text: string, params:unknown[]):Promise<QueryResult<unknown
 
 declare module 'pg' {
   export interface PoolClient {
-    lastQuery?: unknown[]
+    lastQuery?: unknown[];
   }
 }
 
@@ -41,9 +44,9 @@ async function getClient(): Promise<PoolClient> {
         `The last executed query on this client was: ${client.lastQuery}`
       );
     }, 5000);
-    
+
     // monkey patch the query method to keep track of the last query executed
-    client.query = (...args:unknown[]) => {
+    client.query = (...args: unknown[]) => {
       client.lastQuery = args;
       return query.apply(client, args);
     };

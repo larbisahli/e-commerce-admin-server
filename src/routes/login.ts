@@ -14,7 +14,7 @@ const DEV_NODE_ENV = ENV.NODE_ENV !== 'production';
 
 const router = Router();
 
-let PrivateKEY:string;
+let PrivateKEY: string;
 
 if (process.env.NODE_ENV === 'production') {
   const jwtRS256File = path.join(process.cwd(), 'jwtRS256.key');
@@ -77,7 +77,7 @@ router
             // Sign Options
             const SignOptions = {
               expiresIn: remember_me ? '30d' : '1d',
-              algorithms: ['RS256']
+              algorithms: ['RS256'],
             };
             /* Sign token */
             jwt.sign(payload, PrivateKEY, SignOptions, (err, token) => {

@@ -2,7 +2,7 @@ import * as jwt from 'jsonwebtoken';
 import PublicKEY from '../lib/jwtPublicKey';
 import { query } from '../db';
 import cookie from 'cookie';
-import type {ExpressMiddleware} from '../interfaces'
+import type { ExpressMiddleware } from '../interfaces';
 import { Response } from 'express';
 
 const ENV = process.env;
@@ -22,12 +22,12 @@ declare module 'jsonwebtoken' {
 
 declare module 'express' {
   export interface Request {
-    account_uid?: string
-    privileges?: string[]
+    account_uid?: string;
+    privileges?: string[];
   }
 }
 
-const Clear_DGALA_Cookie = (res:Response, DGALA_TOKEN:string) => {
+const Clear_DGALA_Cookie = (res: Response, DGALA_TOKEN: string) => {
   if (DGALA_TOKEN) {
     res.setHeader(
       'set-Cookie',
@@ -44,7 +44,7 @@ const Clear_DGALA_Cookie = (res:Response, DGALA_TOKEN:string) => {
   return;
 };
 
-const Authorization:ExpressMiddleware = async(req, res, next)=> {
+const Authorization: ExpressMiddleware = async (req, res, next) => {
   // Token Validation
   let results = null;
   const bearerHeader = req.headers?.authorization;
@@ -108,6 +108,6 @@ const Authorization:ExpressMiddleware = async(req, res, next)=> {
     return next(err);
   }
   return next();
-}
+};
 
-export default Authorization
+export default Authorization;

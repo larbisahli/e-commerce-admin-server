@@ -61,8 +61,6 @@ router.route('/').post((request, response) => {
 
 export default router;
 
-
-
 // ## Cron Service To Schedule Postgresql Backups
 
 // We are using crontab to run backups daily at midnight

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-let PublicKEY:string;
+let PublicKEY: string;
 
 if (process.env.NODE_ENV === 'production') {
   const jwtRS256File = path.join(process.cwd(), 'jwtRS256.key.pub');

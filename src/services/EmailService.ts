@@ -8,7 +8,10 @@ interface EmailType {
   url: string;
 }
 
-export const sendConfirmationEmail: ({ email, url }: EmailType) => Promise<void> = async ({ email, url }) => {
+export const sendConfirmationEmail: ({
+  email,
+  url,
+}: EmailType) => Promise<void> = async ({ email, url }) => {
   await sgMail
     .send({
       to: email,
@@ -20,7 +23,7 @@ export const sendConfirmationEmail: ({ email, url }: EmailType) => Promise<void>
     .then(() => {
       console.log('Email sent');
     })
-    .catch((error:Error) => {
+    .catch((error: Error) => {
       console.error(error);
     });
 };
