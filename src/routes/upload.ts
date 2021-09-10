@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import UploadImageByUrl from '../lib/upload';
 import { query } from '../db';
-import QueryString from '../sql/Queries';
+import * as QueryString from '../sql/Queries';
 import { deleteObject } from '../lib/S3';
 import Authorization from '../middleware/Authorization';
+import { QueryCheckThumbnailType,QueryCheckProductTitleType } from '../interfaces';
 
 const router = Router();
 
@@ -26,7 +27,7 @@ router
 
     try {
       if (ImageIndex === 0) {
-        const { rows: thumbnail } = await query(QueryString.CheckThumbnail(), [
+        const { rows: thumbnail } = await query<QueryCheckThumbnailType, (string)>(QueryString.CheckThumbnail(), [
           product_uid,
         ]);
 
@@ -38,7 +39,7 @@ router
         }
       }
 
-      const { rows: product } = await query(
+      const { rows: product } = await query<QueryCheckProductTitleType, (string)>(
         `SELECT title from products WHERE product_uid = $1`,
         [product_uid]
       );
@@ -76,7 +77,7 @@ router
       return res.status(403).json({ success: false, error: 'Require Fields!' });
 
     try {
-      deleteObject(image_uid, async (error) => {
+      deleteObject(image_uid, async (error:Error) => {
         if (error) {
           return res.status(500).json({ success: false, error });
         }
@@ -91,4 +92,4 @@ router
     }
   });
 
-module.exports = router;
+export default router;

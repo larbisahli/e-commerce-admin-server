@@ -6,6 +6,7 @@ import cookie from 'cookie';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
+import type {QueryAccountType} from '../interfaces'
 
 dotenv.config();
 
@@ -42,8 +43,8 @@ router
     }
 
     try {
-      const { rows } = await query('SELECT * FROM accounts WHERE email = $1', [
-        email,
+      const { rows } = await query<QueryAccountType, (string)>('SELECT * FROM accounts WHERE email = $1', [
+        email
       ]);
 
       const results = rows[0];

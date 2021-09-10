@@ -15,10 +15,7 @@ const pool = new Pool({
   max: 20,
 });
 
-async function query<Type>(
-  text: string,
-  params: unknown[]
-): Promise<QueryResult<Type>> {
+async function query<T, P>(text: string, params: P[]): Promise<QueryResult<T>> {
   try {
     return await pool.query(text, params);
   } catch (error) {

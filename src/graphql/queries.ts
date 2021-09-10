@@ -1,121 +1,136 @@
+import * as QueryString from '../sql/Queries';
+import { query } from '../db';
+import { GraphQLObjectType, GraphQLInt, GraphQLID, GraphQLList } from 'graphql';
 import {
-  GraphQLObjectType,
-  GraphQLInputObjectType,
-  GraphQLString,
-  GraphQLInt,
-  GraphQLBoolean,
-  GraphQLID,
-  GraphQLList,
-  GraphQLFloat,
-} from 'graphql';
+  ProductType,
+  CategoryType,
+  ProductsCountType,
+  AttributeType,
+} from './types';
+import type {
+  PropsQueryAttributesType,
+  PropsQueryAttributeType,
+  PropsQueryCategoryType,
+  PropsQueryProductsType,
+  PropsQueryProductType,
+  QueryAttributeType,
+  QueryCategoryType,
+  QueryProductsCountType,
+  QueryProductsType,
+  QueryProductType,
+} from '../interfaces';
 
-export const AccountType = new GraphQLObjectType({
-  name: 'account',
-  fields: () => ({
-    account_uid: { type: GraphQLID },
-    first_name: { type: GraphQLString },
-    last_name: { type: GraphQLString },
-    phone_number: { type: GraphQLInt },
-    email: { type: GraphQLString },
-    password: { type: GraphQLString },
-    registered_at: { type: GraphQLString },
-    is_active: { type: GraphQLBoolean },
-    privileges: { type: new GraphQLList(GraphQLString) },
-    birthdate: { type: GraphQLString },
-  }),
-});
+export default new GraphQLObjectType({
+  name: 'RootQueryType',
+  fields: {
+    Category: {
+      type: CategoryType,
+      args: {
+        category_uid: { type: GraphQLID },
+      },
+      async resolve(parent, { category_uid }: PropsQueryCategoryType) {
+        const { rows } = await query<QueryCategoryType, string>(
+          QueryString.Category(),
+          [category_uid]
+        );
+        return rows[0];
+      },
+    },
+    Categories: {
+      type: new GraphQLList(CategoryType),
+      args: {},
+      async resolve() {
+        // **** Use pagination when it grows ****
+        const { rows } = await query<QueryCategoryType, unknown>(
+          QueryString.Categories(),
+          []
+        );
+        return rows;
+      },
+    },
+    Product: {
+      type: ProductType,
+      args: {
+        product_uid: { type: GraphQLID },
+      },
+      async resolve(parent, { product_uid }: PropsQueryProductType) {
+        const product = await query<QueryProductType, string>(
+          QueryString.Product(),
+          [product_uid]
+        );
 
-export const ProfileType = new GraphQLObjectType({
-  name: 'account_profile',
-  fields: () => ({
-    profile_uid: { type: GraphQLID },
-    account_uid: { type: GraphQLID },
-    username: { type: GraphQLString },
-    intro: { type: GraphQLString },
-    date_updated: { type: GraphQLString },
-    profile_img: { type: GraphQLString },
-    background_img: { type: GraphQLString },
-  }),
-});
+        if (product?.rowCount === 0) {
+          throw new Error(`Product not found!, product_uid: ${product_uid}`);
+        }
 
-export const CategoryType = new GraphQLObjectType({
-  name: 'category',
-  fields: () => ({
-    category_uid: { type: GraphQLID },
-    category_name: { type: GraphQLString },
-    category_description: { type: GraphQLString },
-    is_active: { type: GraphQLBoolean },
-    display_order: { type: GraphQLInt },
-  }),
-});
+        return product?.rows[0];
+      },
+    },
+    Products: {
+      type: new GraphQLList(ProductType),
+      args: {
+        account_uid: { type: GraphQLID },
+        category_uid: { type: GraphQLID },
+        page: { type: GraphQLInt },
+        limit: { type: GraphQLInt },
+      },
+      async resolve(
+        parent,
+        { account_uid, category_uid, page, limit }: PropsQueryProductsType
+      ) {
+        const offset = page === 0 ? 0 : (page - 1) * limit;
 
-export const ProductType = new GraphQLObjectType({
-  name: 'product',
-  fields: () => ({
-    product_uid: { type: GraphQLID },
-    category_uid: { type: GraphQLID },
-    account_uid: { type: GraphQLID },
-    title: { type: GraphQLString },
-    price: { type: GraphQLFloat },
-    discount: { type: GraphQLFloat },
-    warehouse_location: { type: GraphQLString },
-    product_description: { type: GraphQLString },
-    short_description: { type: GraphQLString },
-    inventory: { type: GraphQLInt },
-    product_weight: { type: GraphQLFloat },
-    is_new: { type: GraphQLBoolean },
-    note: { type: GraphQLString },
-    thumbnail: { type: new GraphQLList(IMGType) },
-    gallery: { type: new GraphQLList(IMGType) },
-    created_at: { type: GraphQLString },
-    updated_at: { type: GraphQLString },
-  }),
-});
-
-export const IMGType = new GraphQLObjectType({
-  name: 'IMG',
-  fields: () => ({
-    image_uid: { type: GraphQLID },
-    image: { type: GraphQLString },
-    display_order: { type: GraphQLInt },
-  }),
-});
-
-export const ProductsCountType = new GraphQLObjectType({
-  name: 'ProductsCount',
-  fields: () => ({
-    count: { type: GraphQLInt },
-  }),
-});
-
-export const AttributeType = new GraphQLObjectType({
-  name: 'attributes',
-  fields: () => ({
-    attribute_uid: { type: GraphQLID },
-    product_uid: { type: GraphQLID },
-    attribute_name: { type: GraphQLString },
-    options: { type: new GraphQLList(OptionType) },
-  }),
-});
-
-export const OptionType = new GraphQLObjectType({
-  name: 'option',
-  fields: () => ({
-    option_uid: { type: GraphQLID },
-    attribute_uid: { type: GraphQLID },
-    option_name: { type: GraphQLString },
-    additional_price: { type: GraphQLFloat },
-    color_hex: { type: GraphQLString },
-  }),
-});
-
-export const OptionInputType = new GraphQLInputObjectType({
-  name: 'OptionInput',
-  fields: () => ({
-    option_uid: { type: GraphQLID },
-    attribute_uid: { type: GraphQLID },
-    option_name: { type: GraphQLString },
-    additional_price: { type: GraphQLFloat },
-    color_hex: { type: GraphQLString },
-  }),
+        if (category_uid) {
+          const { rows } = await query<QueryProductsType, string | number>(
+            QueryString.Products(),
+            [category_uid, account_uid, limit, offset]
+          );
+          return rows;
+        } else {
+          const { rows } = await query<QueryProductsType, string | number>(
+            QueryString.ProductsByAccount(),
+            [account_uid, limit, offset]
+          );
+          return rows;
+        }
+      },
+    },
+    ProductsCount: {
+      type: ProductsCountType,
+      args: {},
+      async resolve() {
+        const { rows } = await query<QueryProductsCountType, unknown>(
+          QueryString.ProductCount(),
+          []
+        );
+        return rows[0];
+      },
+    },
+    attribute: {
+      type: AttributeType,
+      args: {
+        attribute_uid: { type: GraphQLID },
+      },
+      async resolve(parent, { attribute_uid }: PropsQueryAttributeType) {
+        const { rows } = await query<QueryAttributeType, string>(
+          QueryString.Attribute(),
+          [attribute_uid]
+        );
+        return rows[0];
+      },
+    },
+    attributes: {
+      type: new GraphQLList(AttributeType),
+      args: {
+        product_uid: { type: GraphQLID },
+      },
+      async resolve(parent, { product_uid }: PropsQueryAttributesType) {
+        const { rows } = await query<QueryAttributeType, string>(
+          QueryString.Attributes(),
+          [product_uid]
+        );
+        return rows;
+      },
+    },
+  },
 });

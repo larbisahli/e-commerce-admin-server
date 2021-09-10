@@ -18,7 +18,8 @@ const s3 = new aws.S3({
 
 const newDate = new Date();
 const StringDate =
-  parseInt(newDate.getMonth() + 1) +
+  newDate.getMonth() +
+  1 +
   '_' +
   newDate.getDate() +
   '_' +

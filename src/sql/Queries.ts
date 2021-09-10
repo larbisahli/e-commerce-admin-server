@@ -2,11 +2,11 @@
 
 // order by display_order
 export function Categories(): string {
-  return `SELECT * FROM categories`;
+  return `SELECT category_uid, category_name, category_description, is_active, display_order FROM categories`;
 }
 
 export function Category(): string {
-  return `SELECT * FROM categories WHERE category_uid = $1`;
+  return `SELECT category_uid, category_name, category_description, is_active, display_order FROM categories WHERE category_uid = $1`;
 }
 
 export function InsertCategory(): string {
@@ -52,7 +52,7 @@ export function Product(): string {
 }
 
 export function ProductCount(): string {
-  return `SELECT count(product_uid) From products`;
+  return `SELECT count(product_uid) FROM products`;
 }
 
 export function InsertProduct(): string {
@@ -112,11 +112,11 @@ export function InsertAttribute(): string {
 }
 
 export function UpdateAttribute(): string {
-  return `UPDATE attributes SET attribute_name = $2 WHERE attribute_uid = $1 RETURNING attribute_name`;
+  return `UPDATE attributes SET attribute_name = $2 WHERE attribute_uid = $1 RETURNING attribute_uid, attribute_name`;
 }
 
 export function DeleteAttribute(): string {
-  return `DELETE FROM attributes WHERE attribute_uid = $1 RETURNING attribute_name`;
+  return `DELETE FROM attributes WHERE attribute_uid = $1 RETURNING attribute_uid, attribute_name`;
 }
 
 // **** (options) Table Queries ****
@@ -126,9 +126,9 @@ export function InsertOption(): string {
 }
 
 export function UpdateOption(): string {
-  return `UPDATE options SET option_name = $2, additional_price = $3, color_hex = $4 WHERE option_uid = $1 RETURNING option_name`;
+  return `UPDATE options SET option_name = $2, additional_price = $3, color_hex = $4 WHERE option_uid = $1 RETURNING option_uid, option_name`;
 }
 
 export function DeleteOption(): string {
-  return `DELETE FROM options WHERE option_uid = $1 RETURNING option_name`;
+  return `DELETE FROM options WHERE option_uid = $1 RETURNING option_uid, option_name`;
 }
