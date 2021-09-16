@@ -8,7 +8,6 @@ import {
   QueryCheckThumbnailType,
   QueryCheckProductTitleType,
 } from '../interfaces/query';
-import type { PrivilegesType } from '../interfaces';
 import { Response, Request } from 'express';
 import { CREATE, DELETE } from '../interfaces/constants';
 
