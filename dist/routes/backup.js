@@ -1,66 +1,58 @@
-'use strict';
-var __importDefault =
-  (this && this.__importDefault) ||
-  function (mod) {
-    return mod && mod.__esModule ? mod : { default: mod };
-  };
-Object.defineProperty(exports, '__esModule', { value: true });
-const express_1 = require('express');
-const aws_sdk_1 = __importDefault(require('aws-sdk'));
-const multer_1 = __importDefault(require('multer'));
-const multer_s3_1 = __importDefault(require('multer-s3'));
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const aws_sdk_1 = __importDefault(require("aws-sdk"));
+const multer_1 = __importDefault(require("multer"));
+const multer_s3_1 = __importDefault(require("multer-s3"));
 const router = (0, express_1.Router)();
 aws_sdk_1.default.config.update({
-  accessKeyId: process.env.SPACES_ACCESS_KEY_ID,
-  secretAccessKey: process.env.SPACES_ACCESS_KEY,
+    accessKeyId: process.env.SPACES_ACCESS_KEY_ID,
+    secretAccessKey: process.env.SPACES_ACCESS_KEY,
 });
 // Set S3 endpoint to DigitalOcean Spaces
-const spacesEndpoint = new aws_sdk_1.default.Endpoint(
-  process.env.SPACES_BUCKET_ENDPOINT
-);
+const spacesEndpoint = new aws_sdk_1.default.Endpoint(process.env.SPACES_BUCKET_ENDPOINT);
 const s3 = new aws_sdk_1.default.S3({
-  endpoint: spacesEndpoint,
+    endpoint: spacesEndpoint,
 });
 const newDate = new Date();
-const StringDate =
-  newDate.getMonth() +
-  1 +
-  '_' +
-  newDate.getDate() +
-  '_' +
-  newDate.getFullYear();
+const StringDate = newDate.getMonth() +
+    1 +
+    '_' +
+    newDate.getDate() +
+    '_' +
+    newDate.getFullYear();
 const upload = (0, multer_1.default)({
-  storage: (0, multer_s3_1.default)({
-    s3,
-    bucket: process.env.SPACES_BUCKET_NAME,
-    acl: 'public-read',
-    key: function (request, file, cb) {
-      const { originalname } = file;
-      let fileName = file.originalname;
-      if (originalname.includes('postgresql_backup')) {
-        fileName = file.originalname.replace(
-          'postgresql_backup',
-          `postgresql_backup_${StringDate}`
-        );
-      }
-      cb(null, fileName);
-    },
-  }),
+    storage: (0, multer_s3_1.default)({
+        s3,
+        bucket: process.env.SPACES_BUCKET_NAME,
+        acl: 'public-read',
+        key: function (request, file, cb) {
+            const { originalname } = file;
+            let fileName = file.originalname;
+            if (originalname.includes('postgresql_backup')) {
+                fileName = file.originalname.replace('postgresql_backup', `postgresql_backup_${StringDate}`);
+            }
+            cb(null, fileName);
+        },
+    }),
 }).array('upload', 1);
 router.route('/').post((request, response) => {
-  console.log(`request`, request.body);
-  upload(request, response, function (error) {
-    if (error) {
-      console.log('Unsuccessful upload', { error });
-      return response.status(500).json({
-        success: false,
-      });
-    }
-    console.log('File uploaded successfully.');
-    response.status(200).json({
-      success: true,
+    console.log(`request`, request.body);
+    upload(request, response, function (error) {
+        if (error) {
+            console.log('Unsuccessful upload', { error });
+            return response.status(500).json({
+                success: false,
+            });
+        }
+        console.log('File uploaded successfully.');
+        response.status(200).json({
+            success: true,
+        });
     });
-  });
 });
 exports.default = router;
 // ## Cron Service To Schedule Postgresql Backups

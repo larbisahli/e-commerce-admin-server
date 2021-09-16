@@ -1,12 +1,7 @@
-'use strict';
+"use strict";
 // ******** <CONSTANTS> ********
-Object.defineProperty(exports, '__esModule', { value: true });
-exports.ADMIN =
-  exports.DELETE =
-  exports.UPDATE =
-  exports.CREATE =
-  exports.READ =
-    void 0;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ADMIN = exports.DELETE = exports.UPDATE = exports.CREATE = exports.READ = void 0;
 exports.READ = 'has_read_privilege';
 exports.CREATE = 'has_create_privilege';
 exports.UPDATE = 'has_update_privilege';
