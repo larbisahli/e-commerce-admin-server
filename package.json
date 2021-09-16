@@ -72,9 +72,6 @@
     "typescript": "^4.4.2"
   },
   "lint-staged": {
-    "*.+(ts|.d.ts)": [
-      "yarn tsc"
-    ],
     "*.+(js|jsx|ts|tsx|json|css|md|mdx)": [
       "yarn prettier"
     ]

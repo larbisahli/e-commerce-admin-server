@@ -131,7 +131,11 @@ const Authorization = (req, res, next) =>
           : UserInfo.account_uid;
       const UserPrivileges =
         UserInfo === null || UserInfo === void 0 ? void 0 : UserInfo.privileges;
-      if (UserPrivileges.length === 0) {
+      if (
+        !(UserPrivileges === null || UserPrivileges === void 0
+          ? void 0
+          : UserPrivileges.includes(constants_1.READ))
+      ) {
         Clear_DGALA_Cookie(res, DGALA_TOKEN);
       }
       if (account_uid) {

@@ -83,7 +83,7 @@ const Authorization: ExpressMiddleware = async (req, res, next) => {
     const account_uid = UserInfo?.account_uid;
     const UserPrivileges = UserInfo?.privileges;
 
-    if (UserPrivileges.length === 0) {
+    if (!UserPrivileges?.includes(READ)) {
       Clear_DGALA_Cookie(res, DGALA_TOKEN);
     }
 
