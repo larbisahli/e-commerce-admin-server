@@ -67,7 +67,7 @@ const Authorization = (req, res, next) => __awaiter(void 0, void 0, void 0, func
             // Show IP address
             console.log(`Error: No credentials sent!, ip:${IpAddress}`);
             Clear_DGALA_Cookie(res, DGALA_TOKEN);
-            return res.status(403).send({ message: 'Unauthorized access' });
+            return res.status(403).send({ message: 'Unauthorized Access!' });
         }
         const bearer = bearerHeader.split(' ');
         const bearerToken = bearer[1];
@@ -79,6 +79,7 @@ const Authorization = (req, res, next) => __awaiter(void 0, void 0, void 0, func
         const UserPrivileges = UserInfo === null || UserInfo === void 0 ? void 0 : UserInfo.privileges;
         if (!(UserPrivileges === null || UserPrivileges === void 0 ? void 0 : UserPrivileges.includes(constants_1.READ))) {
             Clear_DGALA_Cookie(res, DGALA_TOKEN);
+            return res.status(403).send({ message: 'Unauthorized Access!' });
         }
         if (account_uid) {
             const { rows } = yield (0, database_1.query)('SELECT account_uid, is_active, privileges FROM accounts WHERE account_uid = $1', [account_uid], {
