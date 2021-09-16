@@ -9,7 +9,8 @@
     "start": "cross-env NODE_ENV=production tsc & node .",
     "dev": "cross-env NODE_ENV=development nodemon dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prettier": "prettier --write \"**/*.{ts,json,yml}\""
+    "prettier": "prettier --write \"**/*.{ts,json,yml}\"",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@sendgrid/mail": "^7.4.6",
@@ -66,8 +67,14 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.0",
     "husky": "^7.0.0",
+    "lint-staged": "^11.1.2",
     "nodemon": "^2.0.7",
     "prettier": "^2.3.0",
     "typescript": "^4.4.2"
+  },
+  "lint-staged": {
+    "*.+(js|jsx|ts|tsx|json|css|md|mdx)": [
+      "yarn prettier"
+    ]
   }
 }
