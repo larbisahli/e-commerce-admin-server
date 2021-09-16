@@ -1,4 +1,4 @@
-import { query, getClient } from '../db';
+import { query, getClient } from '../database';
 import * as QueryString from '../sql/Queries';
 import {
   GraphQLObjectType,
@@ -23,12 +23,16 @@ import type {
   MutationIMGType,
   MutationOptionType,
   MutationProductType,
+} from '../interfaces/query';
+import {
   PropsMutationAttributeType,
   PropsMutationCategoryType,
   PropsMutationIMGType,
   PropsMutationOptionType,
-  PropsMutationProductType,
-} from '../interfaces';
+  PropsMutationProductType
+} from '../interfaces/props'
+import { CREATE, UPDATE, ADMIN, DELETE } from '../interfaces/constants'
+import { GraphQLContextType } from '../interfaces';
 
 export default new GraphQLObjectType({
   name: 'Mutation',
@@ -46,11 +50,16 @@ export default new GraphQLObjectType({
           category_name,
           category_description,
           is_active,
-        }: PropsMutationCategoryType
+        }: PropsMutationCategoryType,
+        {privileges}: GraphQLContextType
       ) {
         const { rows } = await query<MutationCategoryType, string | boolean>(
           QueryString.InsertCategory(),
-          [category_name, category_description, is_active]
+          [category_name, category_description, is_active],
+          {
+            privileges,
+            actions: [CREATE, ADMIN]
+          }
         );
         return rows[0];
       },
@@ -70,11 +79,16 @@ export default new GraphQLObjectType({
           category_name,
           category_description,
           is_active,
-        }: PropsMutationCategoryType
+        }: PropsMutationCategoryType,
+        {privileges}: GraphQLContextType
       ) {
         const { rows } = await query<MutationCategoryType, string | boolean>(
           QueryString.UpdateCategory(),
-          [category_uid, category_name, category_description, is_active]
+          [category_uid, category_name, category_description, is_active],
+          {
+            privileges,
+            actions: [UPDATE, ADMIN]
+          }
         );
         return rows[0];
       },
@@ -110,7 +124,8 @@ export default new GraphQLObjectType({
           product_weight,
           is_new,
           note,
-        }: PropsMutationProductType
+        }: PropsMutationProductType,
+        {privileges}: GraphQLContextType
       ) {
         const { rows } = await query<
           MutationProductType,
@@ -128,7 +143,11 @@ export default new GraphQLObjectType({
           product_weight,
           is_new,
           note,
-        ]);
+        ],
+        {
+          privileges,
+          actions: [CREATE]
+        });
         return rows[0];
       },
     },
@@ -163,7 +182,8 @@ export default new GraphQLObjectType({
           product_weight,
           is_new,
           note,
-        }: PropsMutationProductType
+        }: PropsMutationProductType,
+        {privileges}: GraphQLContextType
       ) {
         const { rows } = await query<
           MutationProductType,
@@ -181,7 +201,11 @@ export default new GraphQLObjectType({
           product_weight,
           is_new,
           note,
-        ]);
+        ],
+        {
+          privileges,
+          actions: [UPDATE]
+        });
         return rows[0];
       },
     },
@@ -194,9 +218,13 @@ export default new GraphQLObjectType({
       },
       async resolve(
         parent,
-        { product_uid, attribute_name, options }: PropsMutationAttributeType
+        { product_uid, attribute_name, options }: PropsMutationAttributeType,
+        {privileges}: GraphQLContextType
       ) {
-        const client = await getClient();
+        const client = await getClient({
+          privileges,
+          actions: [CREATE]
+        });
 
         // **** TRANSACTION ****
         try {
@@ -251,11 +279,16 @@ export default new GraphQLObjectType({
       },
       async resolve(
         parent,
-        { attribute_uid, attribute_name }: PropsMutationAttributeType
+        { attribute_uid, attribute_name }: PropsMutationAttributeType,
+        {privileges}: GraphQLContextType
       ) {
         const { rows } = await query<MutationAttributeType, string>(
           QueryString.UpdateAttribute(),
-          [attribute_uid, attribute_name]
+          [attribute_uid, attribute_name],
+          {
+            privileges,
+            actions: [UPDATE]
+          }
         );
         return rows[0];
       },
@@ -265,10 +298,14 @@ export default new GraphQLObjectType({
       args: {
         attribute_uid: { type: GraphQLID },
       },
-      async resolve(parent, { attribute_uid }: PropsMutationAttributeType) {
+      async resolve(parent, { attribute_uid }: PropsMutationAttributeType, {privileges}: GraphQLContextType) {
         const { rows } = await query<MutationAttributeType, string>(
           QueryString.DeleteAttribute(),
-          [attribute_uid]
+          [attribute_uid],
+          {
+            privileges,
+            actions: [DELETE]
+          }
         );
         return rows[0];
       },
@@ -288,11 +325,16 @@ export default new GraphQLObjectType({
           option_name,
           additional_price,
           color_hex,
-        }: PropsMutationOptionType
+        }: PropsMutationOptionType,
+        {privileges}: GraphQLContextType
       ) {
         const { rows } = await query<MutationOptionType, string | number>(
           QueryString.InsertOption(),
-          [attribute_uid, option_name, additional_price, color_hex]
+          [attribute_uid, option_name, additional_price, color_hex],
+          {
+            privileges,
+            actions: [CREATE]
+          }
         );
         return rows[0];
       },
@@ -312,11 +354,16 @@ export default new GraphQLObjectType({
           option_name,
           additional_price,
           color_hex,
-        }: PropsMutationOptionType
+        }: PropsMutationOptionType,
+        {privileges}: GraphQLContextType
       ) {
         const { rows } = await query<MutationOptionType, string | number>(
           QueryString.UpdateOption(),
-          [option_uid, option_name, additional_price, color_hex]
+          [option_uid, option_name, additional_price, color_hex],
+          {
+            privileges,
+            actions: [UPDATE]
+          }
         );
         return rows[0];
       },
@@ -326,10 +373,14 @@ export default new GraphQLObjectType({
       args: {
         option_uid: { type: GraphQLID },
       },
-      async resolve(parent, { option_uid }: PropsMutationOptionType) {
-        const { rows } = await query<MutationOptionType, string | number>(
+      async resolve(parent, { option_uid }: PropsMutationOptionType, {privileges}: GraphQLContextType) {
+        const { rows } = await query<MutationOptionType, string>(
           QueryString.DeleteOption(),
-          [option_uid]
+          [option_uid],
+          {
+            privileges,
+            actions: [DELETE]
+          }
         );
         return rows[0];
       },
@@ -342,11 +393,16 @@ export default new GraphQLObjectType({
       },
       async resolve(
         parent,
-        { image_uid, display_order }: PropsMutationIMGType
+        { image_uid, display_order }: PropsMutationIMGType,
+        {privileges}: GraphQLContextType
       ) {
         const { rows } = await query<MutationIMGType, string | number>(
           QueryString.UpdateImageOrder(),
-          [image_uid, display_order]
+          [image_uid, display_order],
+          {
+            privileges,
+            actions: [UPDATE]
+          }
         );
         return rows[0];
       },

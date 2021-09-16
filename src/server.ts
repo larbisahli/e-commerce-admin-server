@@ -11,6 +11,7 @@ import RedisStore from 'rate-limit-redis';
 import helmet from 'helmet';
 import formData from 'express-form-data';
 import Authorization from './middleware/Authorization';
+import type {READ_TYPE, CREATE_TYPE, UPDATE_TYPE, DELETE_TYPE, ADMIN_TYPE} from './interfaces/constants'
 import dotenv from 'dotenv';
 import debug from 'debug';
 
@@ -65,7 +66,7 @@ app.use(
 interface GraphRequest extends Request {
   cookies: unknown;
   account_uid: string;
-  privileges: string[];
+  privileges: (READ_TYPE | CREATE_TYPE | UPDATE_TYPE | DELETE_TYPE | ADMIN_TYPE)[];
 }
 
 app.use(
