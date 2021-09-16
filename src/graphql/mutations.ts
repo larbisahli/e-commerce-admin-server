@@ -29,9 +29,9 @@ import {
   PropsMutationCategoryType,
   PropsMutationIMGType,
   PropsMutationOptionType,
-  PropsMutationProductType
-} from '../interfaces/props'
-import { CREATE, UPDATE, ADMIN, DELETE } from '../interfaces/constants'
+  PropsMutationProductType,
+} from '../interfaces/props';
+import { CREATE, UPDATE, ADMIN, DELETE } from '../interfaces/constants';
 import { GraphQLContextType } from '../interfaces';
 
 export default new GraphQLObjectType({
@@ -51,14 +51,14 @@ export default new GraphQLObjectType({
           category_description,
           is_active,
         }: PropsMutationCategoryType,
-        {privileges}: GraphQLContextType
+        { privileges }: GraphQLContextType
       ) {
         const { rows } = await query<MutationCategoryType, string | boolean>(
           QueryString.InsertCategory(),
           [category_name, category_description, is_active],
           {
             privileges,
-            actions: [CREATE, ADMIN]
+            actions: [CREATE, ADMIN],
           }
         );
         return rows[0];
@@ -80,14 +80,14 @@ export default new GraphQLObjectType({
           category_description,
           is_active,
         }: PropsMutationCategoryType,
-        {privileges}: GraphQLContextType
+        { privileges }: GraphQLContextType
       ) {
         const { rows } = await query<MutationCategoryType, string | boolean>(
           QueryString.UpdateCategory(),
           [category_uid, category_name, category_description, is_active],
           {
             privileges,
-            actions: [UPDATE, ADMIN]
+            actions: [UPDATE, ADMIN],
           }
         );
         return rows[0];
@@ -125,29 +125,32 @@ export default new GraphQLObjectType({
           is_new,
           note,
         }: PropsMutationProductType,
-        {privileges}: GraphQLContextType
+        { privileges }: GraphQLContextType
       ) {
         const { rows } = await query<
           MutationProductType,
           string | boolean | number
-        >(QueryString.InsertProduct(), [
-          category_uid,
-          account_uid,
-          title,
-          price,
-          discount,
-          warehouse_location,
-          product_description,
-          short_description,
-          inventory,
-          product_weight,
-          is_new,
-          note,
-        ],
-        {
-          privileges,
-          actions: [CREATE]
-        });
+        >(
+          QueryString.InsertProduct(),
+          [
+            category_uid,
+            account_uid,
+            title,
+            price,
+            discount,
+            warehouse_location,
+            product_description,
+            short_description,
+            inventory,
+            product_weight,
+            is_new,
+            note,
+          ],
+          {
+            privileges,
+            actions: [CREATE],
+          }
+        );
         return rows[0];
       },
     },
@@ -183,29 +186,32 @@ export default new GraphQLObjectType({
           is_new,
           note,
         }: PropsMutationProductType,
-        {privileges}: GraphQLContextType
+        { privileges }: GraphQLContextType
       ) {
         const { rows } = await query<
           MutationProductType,
           string | boolean | number
-        >(QueryString.UpdateProduct(), [
-          product_uid,
-          category_uid,
-          title,
-          price,
-          discount,
-          warehouse_location,
-          product_description,
-          short_description,
-          inventory,
-          product_weight,
-          is_new,
-          note,
-        ],
-        {
-          privileges,
-          actions: [UPDATE]
-        });
+        >(
+          QueryString.UpdateProduct(),
+          [
+            product_uid,
+            category_uid,
+            title,
+            price,
+            discount,
+            warehouse_location,
+            product_description,
+            short_description,
+            inventory,
+            product_weight,
+            is_new,
+            note,
+          ],
+          {
+            privileges,
+            actions: [UPDATE],
+          }
+        );
         return rows[0];
       },
     },
@@ -219,11 +225,11 @@ export default new GraphQLObjectType({
       async resolve(
         parent,
         { product_uid, attribute_name, options }: PropsMutationAttributeType,
-        {privileges}: GraphQLContextType
+        { privileges }: GraphQLContextType
       ) {
         const client = await getClient({
           privileges,
-          actions: [CREATE]
+          actions: [CREATE],
         });
 
         // **** TRANSACTION ****
@@ -280,14 +286,14 @@ export default new GraphQLObjectType({
       async resolve(
         parent,
         { attribute_uid, attribute_name }: PropsMutationAttributeType,
-        {privileges}: GraphQLContextType
+        { privileges }: GraphQLContextType
       ) {
         const { rows } = await query<MutationAttributeType, string>(
           QueryString.UpdateAttribute(),
           [attribute_uid, attribute_name],
           {
             privileges,
-            actions: [UPDATE]
+            actions: [UPDATE],
           }
         );
         return rows[0];
@@ -298,13 +304,17 @@ export default new GraphQLObjectType({
       args: {
         attribute_uid: { type: GraphQLID },
       },
-      async resolve(parent, { attribute_uid }: PropsMutationAttributeType, {privileges}: GraphQLContextType) {
+      async resolve(
+        parent,
+        { attribute_uid }: PropsMutationAttributeType,
+        { privileges }: GraphQLContextType
+      ) {
         const { rows } = await query<MutationAttributeType, string>(
           QueryString.DeleteAttribute(),
           [attribute_uid],
           {
             privileges,
-            actions: [DELETE]
+            actions: [DELETE],
           }
         );
         return rows[0];
@@ -326,14 +336,14 @@ export default new GraphQLObjectType({
           additional_price,
           color_hex,
         }: PropsMutationOptionType,
-        {privileges}: GraphQLContextType
+        { privileges }: GraphQLContextType
       ) {
         const { rows } = await query<MutationOptionType, string | number>(
           QueryString.InsertOption(),
           [attribute_uid, option_name, additional_price, color_hex],
           {
             privileges,
-            actions: [CREATE]
+            actions: [CREATE],
           }
         );
         return rows[0];
@@ -355,14 +365,14 @@ export default new GraphQLObjectType({
           additional_price,
           color_hex,
         }: PropsMutationOptionType,
-        {privileges}: GraphQLContextType
+        { privileges }: GraphQLContextType
       ) {
         const { rows } = await query<MutationOptionType, string | number>(
           QueryString.UpdateOption(),
           [option_uid, option_name, additional_price, color_hex],
           {
             privileges,
-            actions: [UPDATE]
+            actions: [UPDATE],
           }
         );
         return rows[0];
@@ -373,13 +383,17 @@ export default new GraphQLObjectType({
       args: {
         option_uid: { type: GraphQLID },
       },
-      async resolve(parent, { option_uid }: PropsMutationOptionType, {privileges}: GraphQLContextType) {
+      async resolve(
+        parent,
+        { option_uid }: PropsMutationOptionType,
+        { privileges }: GraphQLContextType
+      ) {
         const { rows } = await query<MutationOptionType, string>(
           QueryString.DeleteOption(),
           [option_uid],
           {
             privileges,
-            actions: [DELETE]
+            actions: [DELETE],
           }
         );
         return rows[0];
@@ -394,14 +408,14 @@ export default new GraphQLObjectType({
       async resolve(
         parent,
         { image_uid, display_order }: PropsMutationIMGType,
-        {privileges}: GraphQLContextType
+        { privileges }: GraphQLContextType
       ) {
         const { rows } = await query<MutationIMGType, string | number>(
           QueryString.UpdateImageOrder(),
           [image_uid, display_order],
           {
             privileges,
-            actions: [UPDATE]
+            actions: [UPDATE],
           }
         );
         return rows[0];

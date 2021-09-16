@@ -19,9 +19,9 @@ import {
   PropsQueryAttributeType,
   PropsQueryCategoryType,
   PropsQueryProductsType,
-  PropsQueryProductType
-} from '../interfaces/props'
-import {READ, ADMIN} from '../interfaces/constants'
+  PropsQueryProductType,
+} from '../interfaces/props';
+import { READ, ADMIN } from '../interfaces/constants';
 import { GraphQLContextType } from '../interfaces';
 
 export default new GraphQLObjectType({
@@ -32,15 +32,18 @@ export default new GraphQLObjectType({
       args: {
         category_uid: { type: GraphQLID },
       },
-      async resolve(parent, { category_uid }: PropsQueryCategoryType, {privileges}: GraphQLContextType) {
-
+      async resolve(
+        parent,
+        { category_uid }: PropsQueryCategoryType,
+        { privileges }: GraphQLContextType
+      ) {
         // ONLY ADMIN ACCESS
         const { rows } = await query<QueryCategoryType, string>(
           QueryString.Category(),
           [category_uid],
           {
             privileges,
-            actions: [READ, ADMIN]
+            actions: [READ, ADMIN],
           }
         );
         return rows[0];
@@ -49,14 +52,14 @@ export default new GraphQLObjectType({
     Categories: {
       type: new GraphQLList(CategoryType),
       args: {},
-      async resolve(parent,_, {privileges}: GraphQLContextType) {
+      async resolve(parent, _, { privileges }: GraphQLContextType) {
         // ONLY ADMIN ACCESS
         const { rows } = await query<QueryCategoryType, unknown>(
           QueryString.Categories(),
           [],
           {
             privileges,
-            actions: [READ, ADMIN]
+            actions: [READ, ADMIN],
           }
         );
         return rows;
@@ -67,14 +70,18 @@ export default new GraphQLObjectType({
       args: {
         product_uid: { type: GraphQLID },
       },
-      async resolve(parent, { product_uid }: PropsQueryProductType, {privileges}: GraphQLContextType) {
+      async resolve(
+        parent,
+        { product_uid }: PropsQueryProductType,
+        { privileges }: GraphQLContextType
+      ) {
         // For Partners check account_uid
         const product = await query<QueryProductType, string>(
           QueryString.Product(),
           [product_uid],
           {
             privileges,
-            actions: [READ]
+            actions: [READ],
           }
         );
 
@@ -96,7 +103,7 @@ export default new GraphQLObjectType({
       async resolve(
         parent,
         { account_uid, category_uid, page, limit }: PropsQueryProductsType,
-        {privileges}: GraphQLContextType
+        { privileges }: GraphQLContextType
       ) {
         // For Partners account_uid should be from auth
         const offset = page === 0 ? 0 : (page - 1) * limit;
@@ -107,7 +114,7 @@ export default new GraphQLObjectType({
             [category_uid, account_uid, limit, offset],
             {
               privileges,
-              actions: [READ]
+              actions: [READ],
             }
           );
           return rows;
@@ -117,7 +124,7 @@ export default new GraphQLObjectType({
             [account_uid, limit, offset],
             {
               privileges,
-              actions: [READ]
+              actions: [READ],
             }
           );
           return rows;
@@ -127,13 +134,13 @@ export default new GraphQLObjectType({
     ProductsCount: {
       type: ProductsCountType,
       args: {},
-      async resolve(parent, _, {privileges}: GraphQLContextType) {
+      async resolve(parent, _, { privileges }: GraphQLContextType) {
         const { rows } = await query<QueryProductsCountType, unknown>(
           QueryString.ProductCount(),
           [],
           {
             privileges,
-            actions: [READ]
+            actions: [READ],
           }
         );
         return rows[0];
@@ -144,13 +151,17 @@ export default new GraphQLObjectType({
       args: {
         attribute_uid: { type: GraphQLID },
       },
-      async resolve(parent, { attribute_uid }: PropsQueryAttributeType,{privileges}: GraphQLContextType) {
+      async resolve(
+        parent,
+        { attribute_uid }: PropsQueryAttributeType,
+        { privileges }: GraphQLContextType
+      ) {
         const { rows } = await query<QueryAttributeType, string>(
           QueryString.Attribute(),
           [attribute_uid],
           {
             privileges,
-            actions: [READ]
+            actions: [READ],
           }
         );
         return rows[0];
@@ -161,13 +172,17 @@ export default new GraphQLObjectType({
       args: {
         product_uid: { type: GraphQLID },
       },
-      async resolve(parent, { product_uid }: PropsQueryAttributesType, {privileges}: GraphQLContextType) {
+      async resolve(
+        parent,
+        { product_uid }: PropsQueryAttributesType,
+        { privileges }: GraphQLContextType
+      ) {
         const { rows } = await query<QueryAttributeType, string>(
           QueryString.Attributes(),
           [product_uid],
           {
             privileges,
-            actions: [READ]
+            actions: [READ],
           }
         );
         return rows;

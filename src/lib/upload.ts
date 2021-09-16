@@ -18,7 +18,7 @@ interface ImgRespond {
     path: string;
     ETag?: string;
   };
-  error?: Error
+  error?: Error;
 }
 
 interface UploadImageType {

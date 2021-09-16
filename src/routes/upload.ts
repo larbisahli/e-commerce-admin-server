@@ -4,10 +4,13 @@ import { query } from '../database';
 import * as QueryString from '../sql/Queries';
 import { deleteObject } from '../lib/S3';
 import Authorization from '../middleware/Authorization';
-import { QueryCheckThumbnailType,QueryCheckProductTitleType } from '../interfaces/query';
+import {
+  QueryCheckThumbnailType,
+  QueryCheckProductTitleType,
+} from '../interfaces/query';
 import type { PrivilegesType } from '../interfaces';
 import { Response, Request } from 'express';
-import { CREATE,DELETE } from '../interfaces/constants';
+import { CREATE, DELETE } from '../interfaces/constants';
 
 const router = Router();
 
@@ -15,8 +18,8 @@ const router = Router();
 router
   .route('/')
   .all(Authorization)
-  .post(async (req:Request, res:Response) => {
-    const privileges = req.privileges
+  .post(async (req: Request, res: Response) => {
+    const privileges = req.privileges;
     const { image: url, index, product_uid } = req.body;
 
     if (!url || !index || !product_uid) {
@@ -31,12 +34,12 @@ router
 
     try {
       if (ImageIndex === 0) {
-        const { rows: thumbnail } = await query<QueryCheckThumbnailType, (string)>(QueryString.CheckThumbnail(), [
-          product_uid,
-        ],
-        {
+        const { rows: thumbnail } = await query<
+          QueryCheckThumbnailType,
+          string
+        >(QueryString.CheckThumbnail(), [product_uid], {
           privileges,
-          actions: [CREATE]
+          actions: [CREATE],
         });
 
         if (thumbnail[0]?.thumbnail) {
@@ -47,12 +50,12 @@ router
         }
       }
 
-      const { rows: product } = await query<QueryCheckProductTitleType, (string)>(
+      const { rows: product } = await query<QueryCheckProductTitleType, string>(
         `SELECT title from products WHERE product_uid = $1`,
         [product_uid],
         {
           privileges,
-          actions: [CREATE]
+          actions: [CREATE],
         }
       );
 
@@ -69,16 +72,14 @@ router
         return res.status(500).json({ success: false, error });
       }
 
-      await query<unknown, (string | number)>(QueryString.InsertImage(), [
-        product_uid,
-        image.path,
-        ImageIndex === 0,
-        ImageIndex,
-      ],
-      {
-        privileges,
-        actions: [CREATE]
-      });
+      await query<unknown, string | number>(
+        QueryString.InsertImage(),
+        [product_uid, image.path, ImageIndex === 0, ImageIndex],
+        {
+          privileges,
+          actions: [CREATE],
+        }
+      );
 
       return res.status(200).json({ success: true });
     } catch (error) {
@@ -86,24 +87,22 @@ router
       return res.status(500).json({ success: false, error });
     }
   })
-  .delete(async (req:Request, res:Response) => {
-    const privileges = req.privileges
+  .delete(async (req: Request, res: Response) => {
+    const privileges = req.privileges;
     const { image_uid } = req.body;
 
     if (!image_uid)
       return res.status(403).json({ success: false, error: 'Require Fields!' });
 
     try {
-      deleteObject(image_uid, async (error:Error) => {
+      deleteObject(image_uid, async (error: Error) => {
         if (error) {
           return res.status(500).json({ success: false, error });
         }
 
-        await query<unknown, string>(QueryString.DeleteImage(), 
-        [image_uid],
-        {
+        await query<unknown, string>(QueryString.DeleteImage(), [image_uid], {
           privileges,
-          actions: [DELETE]
+          actions: [DELETE],
         });
 
         return res.status(200).json({ success: true });

@@ -1,13 +1,13 @@
-import { Router,Response,Request } from 'express';
-import jwt, {Algorithm} from 'jsonwebtoken';
+import { Router, Response, Request } from 'express';
+import jwt, { Algorithm } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { query } from '../database';
 import cookie from 'cookie';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
-import {READ} from '../interfaces/constants'
-import type {QueryAccountType} from '../interfaces/query'
+import { READ } from '../interfaces/constants';
+import type { QueryAccountType } from '../interfaces/query';
 
 dotenv.config();
 
@@ -34,8 +34,7 @@ router
       "<div><h1>Forbidden</h1><div>You don't have permission to access this resource</div></div>"
     );
   })
-  .post(async (req:Request, res:Response) => {
-    
+  .post(async (req: Request, res: Response) => {
     const { email, password, remember_me } = req.body;
 
     if (!email || !password) {
@@ -45,14 +44,16 @@ router
     }
 
     try {
-      const { rows } = await query<QueryAccountType, (string)>('SELECT * FROM accounts WHERE email = $1', [
-        email
-      ],{
-        privileges:['has_read_privilege'],
-        actions:[READ]
-       });
+      const { rows } = await query<QueryAccountType, string>(
+        'SELECT * FROM accounts WHERE email = $1',
+        [email],
+        {
+          privileges: ['has_read_privilege'],
+          actions: [READ],
+        }
+      );
 
-       console.log(`rows`, rows)
+      console.log(`rows`, rows);
 
       const results = rows[0];
 
@@ -83,7 +84,7 @@ router
               privileges,
             };
 
-            const Alg:Algorithm = 'RS256'
+            const Alg: Algorithm = 'RS256';
             // Sign Options
             const SignOptions = {
               expiresIn: remember_me ? '30d' : '1d',

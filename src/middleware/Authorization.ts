@@ -2,8 +2,12 @@ import * as jwt from 'jsonwebtoken';
 import PublicKEY from '../lib/jwtPublicKey';
 import { query } from '../database';
 import cookie from 'cookie';
-import type { ExpressMiddleware, AuthType, PrivilegesType } from '../interfaces';
-import {READ} from '../interfaces/constants'
+import type {
+  ExpressMiddleware,
+  AuthType,
+  PrivilegesType,
+} from '../interfaces';
+import { READ } from '../interfaces/constants';
 import { Response } from 'express';
 
 const ENV = process.env;
@@ -24,7 +28,7 @@ declare module 'jsonwebtoken' {
 declare module 'express' {
   export interface Request {
     account_uid: string;
-    privileges: PrivilegesType
+    privileges: PrivilegesType;
   }
 }
 
@@ -79,7 +83,7 @@ const Authorization: ExpressMiddleware = async (req, res, next) => {
     const account_uid = UserInfo?.account_uid;
     const UserPrivileges = UserInfo?.privileges;
 
-    if(UserPrivileges.length === 0){
+    if (UserPrivileges.length === 0) {
       Clear_DGALA_Cookie(res, DGALA_TOKEN);
     }
 
@@ -88,8 +92,8 @@ const Authorization: ExpressMiddleware = async (req, res, next) => {
         'SELECT account_uid, is_active, privileges FROM accounts WHERE account_uid = $1',
         [account_uid],
         {
-         privileges:['has_read_privilege'],
-         actions:[READ]
+          privileges: ['has_read_privilege'],
+          actions: [READ],
         }
       );
       results = rows[0];
