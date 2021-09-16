@@ -1,4 +1,3 @@
-import type { PrivilegesType, ActionsType } from './';
 // ******** <CONSTANTS> ********
 
 export const READ = 'has_read_privilege';
