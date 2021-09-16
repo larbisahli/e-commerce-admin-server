@@ -8,6 +8,7 @@ RUN yarn install --frozen-lockfile
 
 COPY . .
 COPY ./src/config ./
+COPY ./dist ./
 
 EXPOSE 5001
 
