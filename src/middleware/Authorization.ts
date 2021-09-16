@@ -69,7 +69,7 @@ const Authorization: ExpressMiddleware = async (req, res, next) => {
       console.log(`Error: No credentials sent!, ip:${IpAddress}`);
       Clear_DGALA_Cookie(res, DGALA_TOKEN);
 
-      return res.status(403).send({ message: 'Unauthorized access' });
+      return res.status(403).send({ message: 'Unauthorized Access!' });
     }
 
     const bearer = bearerHeader.split(' ');
@@ -85,6 +85,7 @@ const Authorization: ExpressMiddleware = async (req, res, next) => {
 
     if (!UserPrivileges?.includes(READ)) {
       Clear_DGALA_Cookie(res, DGALA_TOKEN);
+      return res.status(403).send({ message: 'Unauthorized Access!' });
     }
 
     if (account_uid) {
