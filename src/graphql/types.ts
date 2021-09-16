@@ -1,10 +1,12 @@
 import {
   GraphQLObjectType,
+  GraphQLInputObjectType,
   GraphQLString,
   GraphQLInt,
   GraphQLBoolean,
   GraphQLID,
   GraphQLList,
+  GraphQLFloat,
 } from 'graphql';
 
 export const AccountType = new GraphQLObjectType({
@@ -37,7 +39,7 @@ export const ProfileType = new GraphQLObjectType({
 });
 
 export const CategoryType = new GraphQLObjectType({
-  name: 'categories',
+  name: 'category',
   fields: () => ({
     category_uid: { type: GraphQLID },
     category_name: { type: GraphQLString },
@@ -54,15 +56,13 @@ export const ProductType = new GraphQLObjectType({
     category_uid: { type: GraphQLID },
     account_uid: { type: GraphQLID },
     title: { type: GraphQLString },
-    price: { type: GraphQLInt },
-    discount: { type: GraphQLInt },
+    price: { type: GraphQLFloat },
+    discount: { type: GraphQLFloat },
     warehouse_location: { type: GraphQLString },
     product_description: { type: GraphQLString },
     short_description: { type: GraphQLString },
     inventory: { type: GraphQLInt },
-    product_weight: { type: GraphQLInt },
-    available_sizes: { type: new GraphQLList(GraphQLString) },
-    available_colors: { type: new GraphQLList(GraphQLString) },
+    product_weight: { type: GraphQLFloat },
     is_new: { type: GraphQLBoolean },
     note: { type: GraphQLString },
     thumbnail: { type: new GraphQLList(IMGType) },
@@ -72,11 +72,12 @@ export const ProductType = new GraphQLObjectType({
   }),
 });
 
-const IMGType = new GraphQLObjectType({
+export const IMGType = new GraphQLObjectType({
   name: 'IMG',
   fields: () => ({
     image_uid: { type: GraphQLID },
-    image: { type: GraphQLString }
+    image: { type: GraphQLString },
+    display_order: { type: GraphQLInt },
   }),
 });
 
@@ -84,5 +85,37 @@ export const ProductsCountType = new GraphQLObjectType({
   name: 'ProductsCount',
   fields: () => ({
     count: { type: GraphQLInt },
+  }),
+});
+
+export const AttributeType = new GraphQLObjectType({
+  name: 'attributes',
+  fields: () => ({
+    attribute_uid: { type: GraphQLID },
+    product_uid: { type: GraphQLID },
+    attribute_name: { type: GraphQLString },
+    options: { type: new GraphQLList(OptionType) },
+  }),
+});
+
+export const OptionType = new GraphQLObjectType({
+  name: 'option',
+  fields: () => ({
+    option_uid: { type: GraphQLID },
+    attribute_uid: { type: GraphQLID },
+    option_name: { type: GraphQLString },
+    additional_price: { type: GraphQLFloat },
+    color_hex: { type: GraphQLString },
+  }),
+});
+
+export const OptionInputType = new GraphQLInputObjectType({
+  name: 'OptionInput',
+  fields: () => ({
+    option_uid: { type: GraphQLID },
+    attribute_uid: { type: GraphQLID },
+    option_name: { type: GraphQLString },
+    additional_price: { type: GraphQLFloat },
+    color_hex: { type: GraphQLString },
   }),
 });

@@ -1,20 +1,26 @@
-import { Router } from 'express';
-import jwt from 'jsonwebtoken';
+import { Router, Response, Request } from 'express';
+import jwt, { Algorithm } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { query } from '../db';
+import { query } from '../database';
 import cookie from 'cookie';
 import fs from 'fs';
-import path from 'path'
+import path from 'path';
+import dotenv from 'dotenv';
+import { READ } from '../interfaces/constants';
+import type { QueryAccountType } from '../interfaces/query';
 
-let router = Router();
-require('dotenv').config();
+dotenv.config();
 
-let PrivateKEY = null
+const ENV = process.env;
+const DEV_NODE_ENV = ENV.NODE_ENV !== 'production';
+
+const router = Router();
+
+let PrivateKEY: string;
 
 if (process.env.NODE_ENV === 'production') {
-  const jwtRS256File = path.join(process.cwd(), "jwtRS256.key")
+  const jwtRS256File = path.join(process.cwd(), 'jwtRS256.key');
   PrivateKEY = fs.readFileSync(jwtRS256File, 'utf8');
-
 } else {
   PrivateKEY = fs.readFileSync('./src/config/jwtRS256.key', 'utf8');
 }
@@ -28,7 +34,7 @@ router
       "<div><h1>Forbidden</h1><div>You don't have permission to access this resource</div></div>"
     );
   })
-  .post(async (req, res) => {
+  .post(async (req: Request, res: Response) => {
     const { email, password, remember_me } = req.body;
 
     if (!email || !password) {
@@ -38,13 +44,18 @@ router
     }
 
     try {
-      const { rows } = await query('SELECT * FROM accounts WHERE email = $1', [
-        email,
-      ]);
+      const { rows } = await query<QueryAccountType, string>(
+        'SELECT * FROM accounts WHERE email = $1',
+        [email],
+        {
+          privileges: ['has_read_privilege'],
+          actions: [READ],
+        }
+      );
+
+      console.log(`rows`, rows);
 
       const results = rows[0];
-
-      console.log(`results`, results);
 
       if (results && results.is_active) {
         /* Define variables */
@@ -52,9 +63,11 @@ router
           account_uid,
           first_name,
           last_name,
+          username,
           email,
           password_hash,
           privileges,
+          profile_img,
         } = results;
         /* Check and compare password */
         bcrypt.compare(password, password_hash).then((isMatch) => {
@@ -65,13 +78,17 @@ router
               account_uid,
               first_name,
               last_name,
+              username,
+              profile_img,
               email,
               privileges,
             };
+
+            const Alg: Algorithm = 'RS256';
             // Sign Options
             const SignOptions = {
-              expiresIn: remember_me ? '7d' : '1d',
-              algorithm: 'RS256',
+              expiresIn: remember_me ? '30d' : '1d',
+              algorithm: Alg,
             };
             /* Sign token */
             jwt.sign(payload, PrivateKEY, SignOptions, (err, token) => {
@@ -86,20 +103,21 @@ router
                 cookie.serialize('DGALA-TOKEN', token, {
                   httpOnly: true,
                   secure: true,
-                  maxAge: remember_me ? 7 * 86400 : 86400,
-                  sameSite: 'Strict',
+                  maxAge: remember_me ? 30 * 86400 : 86400,
+                  sameSite: 'strict',
                   path: '/',
-                  domain: 'dropgala.com'
+                  domain: DEV_NODE_ENV ? '127.0.0.1' : 'dropgala.com',
                 })
               );
               res.status(200).json({
                 success: true,
+                userInfo: { first_name, last_name },
               });
             });
           } else {
             res
               .status(403)
-              .json({ message: 'Password incorrect', success: false });
+              .json({ message: 'Incorrect Password', success: false });
           }
         });
       } else if (!results) {
@@ -122,4 +140,4 @@ router
     }
   });
 
-module.exports = router;
+export default router;
